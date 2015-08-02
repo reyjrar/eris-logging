@@ -1,49 +1,62 @@
 package eris::log::contextualizer;
 
-use eris::base::types;
-
 use Moose;
 use namespace::autoclean;
-use YAML;
+
+use eris::base::types;
+use eris::log::contexts;
+use eris::log::decoders;
+use eris::dictionary;
 
 ########################################################################
 # Attributes
 has config => (
-    is => 'ro',
-    isa => 'eris::type::config',
+    is       => 'ro',
+    isa      => 'eris::type::config',
     required => 1,
-    coerce => 1,
+    coerce   => 1,
 );
 has contexts => (
-    is => 'ro',
-    isa => 'eris::log::contexts',
+    is      => 'ro',
+    isa     => 'eris::log::contexts',
     handles => [qw(contextualize)],
-    lazy => 1,
+    lazy    => 1,
     builder => '_build_contexts',
 );
-has 'decoders' => {
-    is => 'ro',
-    isa => 'eris::log::decoders',
+has 'decoders' => (
+    is      => 'ro',
+    isa     => 'eris::log::decoders',
     handles => [qw(decode)],
-    lazy => 1,
+    lazy    => 1,
     builder => '_build_decoders',
     handles => [qw(decode)],
-}
+);
+has 'dictionary' => (
+    is      => 'ro',
+    isa     => 'eris::dictionary',
+    lazy    => 1,
+    builder => '_build_dictionary',
+
+);
 
 ########################################################################
 # Builders
 sub _build_decoders {
     my $self = shift;
-
     return eris::log::decoders->new(
         %{ $self->config->{decoder} },
     );
 }
 sub _build_contexts {
     my $self = shift;
-
     return eris::log::contexts->new(
         %{ $self->config->{context} },
+    );
+}
+sub _build_dictionary {
+    my $self = shift;
+    return eris::log::dictionary->new(
+        %{ $self->config->{dictionary} },
     );
 }
 ########################################################################

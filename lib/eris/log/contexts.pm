@@ -1,10 +1,9 @@
 package eris::log::contexts;
 
-use eris::dictionaries;
 use namespace::autoclean;
 use Moose;
 with qw(
-    eris::base::role::pluggable
+    eris::role::pluggable
 );
 
 ########################################################################
@@ -27,7 +26,7 @@ sub _build_namespace { 'eris::log::context' };
 sub _build_contexts {
     my ($self) = @_;
     foreach my $p (@{ $self->loader->plugins }) {
-        $_lookups{$p->field} ||= {};
+        $_lookup{$p->field} ||= {};
     }
 }
 

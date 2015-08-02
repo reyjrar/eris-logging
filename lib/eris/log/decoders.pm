@@ -1,5 +1,6 @@
 package eris::log::decoders;
 
+use eris::log;
 use namespace::autoclean;
 use Moose;
 with qw(
@@ -34,9 +35,11 @@ sub decode {
 
     # Store the decoded data
     foreach my $decoder (@{ $self->decoders }) {
-        my $data = $decoder->decode($raw);
+        my $data = $decoder->decode_message($raw);
+        printf "decoding with %s ..\n", $decoder->name;
 
         if( defined $data && ref $data eq 'HASH' ) {
+            printf " + decoded successfully with %s ..\n", $decoder->name;
             $log->set_decoded($decoder->name => $data);
         }
     }

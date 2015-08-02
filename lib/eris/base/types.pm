@@ -1,8 +1,12 @@
 package eris::base::types;
 
 use Moose;
+use Moose::Util::TypeConstraints;
+use YAML;
 
-subtype 'eris::type::config' as 'HashRef';
+# Config File to HashRef Conversion
+subtype 'eris::type::config',
+    as 'HashRef';
 coerce  'eris::type::config'
     => from 'Str'
     => via {
@@ -10,7 +14,7 @@ coerce  'eris::type::config'
         die "invalid config file: $file" unless -f $file;
         my $config;
         eval {
-           $config = Load($file);
+           $config = YAML::LoadFile($file);
            1;
         } or die "unable to parse YAML file: $file, $@";
         return $config;

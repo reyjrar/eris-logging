@@ -3,7 +3,7 @@ package eris::dictionary::cee;
 use namespace::autoclean;
 use Moose;
 with qw(
-    eris::dictionary
+    eris::role::dictionary
 );
 
 has fields => (

@@ -26,15 +26,15 @@ sub decode_message {
             my $m = decode_json( $json_str );
             die unless defined $m;
 
-            $decoded{content} = $json_str;
+            $decoded{content} //= $json_str;
             foreach my $k ( keys %{ $m } ) {
                 # Skip empty values
                 next unless defined $m->{$k} && length $m->{$k};
-
-                $decoded{$dk} = exists $MAP{$k} ? $MAP{$k} : lc $k;
-
+                my $dk = exists $MAP{$k} ? $MAP{$k} : lc $k;
+                $decoded{$dk} = $m->{$k};
             }
-        };
+            1;
+        }
     }
 
     keys %decoded ? \%decoded : undef; # Return Decoded

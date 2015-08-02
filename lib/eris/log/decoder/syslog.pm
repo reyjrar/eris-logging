@@ -9,8 +9,8 @@ $Parse::Syslog::Line::EpochCreate    = 1;
 $Parse::Syslog::Line::PruneRaw       = 1;
 $Parse::Syslog::Line::PruneEmpty     = 1;
 $Parse::Syslog::Line::PruneFields    = qw(
-    preamble facility_int priority_int
     date time date_str message
+    preamble facility_int priority_int
 );
 
 use Moose;

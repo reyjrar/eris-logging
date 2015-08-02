@@ -1,4 +1,4 @@
-package eris::dictionary::eris;
+package eris::dictionary::syslog;
 
 use namespace::autoclean;
 use Moose;
@@ -29,13 +29,8 @@ __PACKAGE__->meta->make_immutable;
 1;
 __DATA__
 source The source of the message
-eris_source Where the eris system contextualized this message
 timestamp The timestamp encoded in the message
 message Message contents, often truncated to relevance.
-referer For web request, the Referrer, note, mispelled as in the RFC
-sld Second-Level Domain, ie what you'd buy on a registrar
-filetype File type or Extension
-mime_type MIME Type of the file
-time_ms Time in millis action took
-response_ms For web requests, total time to send response
-upstream_ms For web requests, total time to get response from upstream service
+severity Syslog severity of the message
+facility Syslog facility of the message
+program The program name or tag that generated the message

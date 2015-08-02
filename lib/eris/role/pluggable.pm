@@ -44,5 +44,4 @@ sub _build_loader {
     return $loader;
 }
 
-__PACKAGE__->meta->make_immutable;
 1;

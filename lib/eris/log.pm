@@ -8,24 +8,24 @@ has raw => (
     isa => 'Str',
     required => 1,
 );
-has decoded => {
+has decoded => (
     is => 'rw',
     isa => 'HashRef',
     lazy => 1,
     default => sub { {} },
-}
-has context => {
+);
+has context => (
     is => 'rw',
     isa => 'HashRef',
     lazy => 1,
     default => sub { {} },
-}
-has context_full => {
+);
+has complete => (
     is => 'rw',
     isa => 'HashRef[HashRef]',
     lazy => 1,
     default => sub { {} },
-}
+);
 
 sub set_decoded {
     my ($self,$name,$href) = @_;
@@ -40,6 +40,9 @@ sub set_decoded {
 
 sub add_context {
     my ($self,$name,$href) = @_;
+    my $complete = $self->complete;
+
+    $complete->{$name} = $href;
 }
 
 __PACKAGE__->meta->make_immutable;
