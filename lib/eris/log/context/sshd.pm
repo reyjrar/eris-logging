@@ -5,7 +5,7 @@ use namespace::autoclean;
 
 use Moose;
 with qw(
-    eris::role::context::simple
+    eris::role::context
 );
 
 sub sample_messages {

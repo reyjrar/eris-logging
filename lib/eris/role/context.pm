@@ -13,16 +13,23 @@ requires qw(
 ########################################################################
 # Attributes
 has name => (
-    is => 'ro',
-    isa => 'Str',
-    lazy => 1,
+    is      => 'ro',
+    isa     => 'Str',
+    lazy    => 1,
     builder => '_build_name',
 );
 has 'field' => (
-    is => 'ro',
-    isa => 'Str',
-    lazy => 1,
+    is      => 'ro',
+    isa     => 'Str',
+    lazy    => 1,
     builder => '_build_field',
+);
+has 'target' => (
+    is      => 'ro',
+    isa     => 'eris::type::target',
+    lazy    => 1,
+    builder => '_build_target',
+    coerce  => 1,
 );
 
 ########################################################################
@@ -40,5 +47,6 @@ sub _build_name {
 # if I want to write a context for sshd, I just need to create
 # eris::log::context::sshd.
 sub _build_field { 'program'; }
+sub _build_target { $self->name; }
 
 1;

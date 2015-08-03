@@ -20,5 +20,22 @@ coerce  'eris::type::config'
         return $config;
     };
 
+# Config File for Targets
+subtype 'eris::type::target',
+    as 'CodeRef';
+coerce 'eris::type::target'
+    => from 'Str'
+    => via {
+        my $target = lc shift;
+        return sub { my $local = lc shift; $target eq $local }
+    };
+coerce 'eris::type::target'
+    => from 'RegexpRef'
+    => via {
+        my $target = shift;
+        return sub { my $local = shift; $local =~ /$target/o };
+    };
+
+
 __PACKAGE__->meta->make_immutable;
 1;
