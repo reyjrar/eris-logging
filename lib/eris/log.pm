@@ -2,6 +2,8 @@ package eris::log;
 
 use Moose;
 use namespace::autoclean;
+use eris::dictionary;
+use Hash::Merge::Simple qw(merge);
 
 has raw => (
     is => 'ro',
@@ -27,6 +29,8 @@ has complete => (
     default => sub { {} },
 );
 
+my $dict;
+
 sub set_decoded {
     my ($self,$name,$href) = @_;
     my $d = $self->decoded;
@@ -43,6 +47,23 @@ sub add_context {
     my $complete = $self->complete;
 
     $complete->{$name} = $href;
+
+
+    $dict ||= eris::dictionary->new;
+
+    # Complete merge
+    my %ok = ();
+    foreach my $k (keys %{ $href }) {
+        my $entry = $dict->lookup($k);
+
+        if( !defined $entry ) {
+            print " Field[$k] is not defined in the dictionary.\n";
+            next;
+        }
+        $ok{$k} = $href->{$k};
+    }
+    my $ctx = merge( $self->context, \%ok );
+    $self->context($ctx);
 }
 
 __PACKAGE__->meta->make_immutable;

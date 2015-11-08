@@ -31,6 +31,12 @@ has 'target' => (
     builder => '_build_target',
     coerce  => 1,
 );
+has 'match_all' => (
+    is      => 'ro',
+    isa     => 'Bool',
+    lazy    => 1,
+    builder => '_build_match_all'
+);
 
 ########################################################################
 # Builders
@@ -47,6 +53,6 @@ sub _build_name {
 # if I want to write a context for sshd, I just need to create
 # eris::log::context::sshd.
 sub _build_field { 'program'; }
-sub _build_target { $self->name; }
+sub _build_target { my ($self) = shift; $self->name; }
 
 1;

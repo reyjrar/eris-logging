@@ -4,27 +4,20 @@ use namespace::autoclean;
 use Moose;
 with qw(
     eris::role::dictionary
+    eris::role::dictionary::hash
 );
-
-has fields => (
-    is => 'ro',
-    isa => 'HashRef',
-    lazy => 1,
-    builder => '_build_fields',
-);
-
 sub _build_priority { 100; }
-
-sub _build_fields {
-    my %fields = ();
+my $_hash=undef;
+sub hash {
+    return $_hash if defined $_hash;
+    my %data;
     while(<DATA>) {
         chomp;
-        my ($k,$v) = split /\s+/, $_;
-        $fields{lc $k} = $v;
+        my ($k,$desc) = split /\s+/, $_, 2;
+        $data{lc $k} = $desc;
     }
-    return \%fields;
+    $_hash = \%data;
 }
-
 __PACKAGE__->meta->make_immutable;
 1;
 __DATA__

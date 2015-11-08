@@ -27,25 +27,31 @@ sub _build_decoders {
 
 ########################################################################
 # Methods
-sub decode {
-    my ($self,$raw) = @_;
+{
+    my $decoders = undef;
+    sub decode {
+        my ($self,$raw) = @_;
 
-    # Create the log entry
-    my $log = eris::log->new( raw => $raw );
+        # Initialize the decoders
+        $decoders //= $self->decoders;
 
-    # Store the decoded data
-    foreach my $decoder (@{ $self->decoders }) {
-        my $data = $decoder->decode_message($raw);
-        printf "decoding with %s ..\n", $decoder->name;
+        # Create the log entry
+        my $log = eris::log->new( raw => $raw );
 
-        if( defined $data && ref $data eq 'HASH' ) {
-            printf " + decoded successfully with %s ..\n", $decoder->name;
-            $log->set_decoded($decoder->name => $data);
+        # Store the decoded data
+        foreach my $decoder (@{ $decoders }) {
+            my $data = $decoder->decode_message($raw);
+            printf "decoding with %s ..\n", $decoder->name;
+
+            if( defined $data && ref $data eq 'HASH' ) {
+                printf " + decoded successfully with %s ..\n", $decoder->name;
+                $log->set_decoded($decoder->name => $data);
+            }
         }
-    }
 
-    $log;      # Return the log object
-}
+        $log;      # Return the log object
+    }
+} # end closure
 
 __PACKAGE__->meta->make_immutable;
 1;

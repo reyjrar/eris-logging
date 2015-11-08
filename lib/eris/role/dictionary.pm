@@ -3,7 +3,7 @@ package eris::role::dictionary;
 use Moose::Role;
 use namespace::autoclean;
 
-requires 'fields';
+requires qw(lookup);
 
 ########################################################################
 # Attributes
@@ -31,5 +31,19 @@ sub _build_name {
     return $path[-1];
 }
 sub _build_priority  { 50; }
+
+
+########################################################################
+# Method Augmentation
+around 'lookup' => sub {
+    my $orig = shift;
+    my $self = shift;
+
+    my $entry = $self->$orig(@_);
+    if( defined $entry && ref $entry eq 'HASH' ) {
+        $entry->{from} = $self->name;
+    }
+    $entry; # return'd
+};
 
 1;

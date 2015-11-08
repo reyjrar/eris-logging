@@ -26,7 +26,6 @@ sub decode_message {
             my $m = decode_json( $json_str );
             die unless defined $m;
 
-            $decoded{content} //= $json_str;
             foreach my $k ( keys %{ $m } ) {
                 # Skip empty values
                 next unless defined $m->{$k} && length $m->{$k};

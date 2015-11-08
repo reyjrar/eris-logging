@@ -1,46 +1,32 @@
 package eris::dictionary;
 
 use namespace::autoclean;
-use Moose;
+use MooseX::Singleton;
 with qw(
     eris::role::pluggable
 );
 
 ########################################################################
 # Attributes
-has 'vocabulary' => (
-    is => 'ro',
-    isa => 'HashRef',
-    lazy => 1,
-    builder => '_build_vocabulary',
-);
 
 ########################################################################
 # Builders
 sub _build_namespace { 'eris::dictionary' }
-sub _build_vocabulary {
-    my ($self) = shift;
-    my %fields = ();
-    foreach my $p (sort { $a->priority <=> $b->priority } $self->loader->plugins ) {
-        my $f = $p->fields;
-        foreach my $k (keys %{ $f }) {
-            $fields{$k} = $f->{$k};
-        }
-    }
-    return \%fields;
-}
-
-my $_dict=();
-sub BUILD {
-    my $self = shift;
-    $_dict = $self->vocabulary();
-}
-
 
 ########################################################################
 # Methods
+my %_dict = ();
 sub lookup {
-    exists $_dict->{$_[1]};     # Does the second arg, ie, the key exist
+    my ($self,$field) = @_;
+    return $_dict{$field} if exists $_dict{$field};
+
+    # Otherwise, lookup
+    my $entry;
+    foreach my $p (sort { $a->priority <=> $b->priority } $self->loader->plugins ) {
+        $entry = $p->lookup($field);
+        last if defined $entry;
+    }
+    defined $entry ? $_dict{$field} = $entry : undef;  # Assignment carries Left to Right and is returned;
 }
 
 __PACKAGE__->meta->make_immutable;

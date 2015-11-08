@@ -21,13 +21,15 @@ has 'contexts' => (
 
 ########################################################################
 # Builders
-sub _build_namespace { 'eris::log::context' };
+sub _build_namespace { 'eris::log::context' }
 
 sub _build_contexts {
     my ($self) = @_;
-    foreach my $p (@{ $self->loader->plugins }) {
-        $_lookup{$p->field} ||= {};
-    }
+
+    #foreach my $p (@{ $self->loader->plugins }) {
+        #$_lookup{$p->field} ||= {};
+    #}
+    return [ $self->loader->plugins ];
 }
 
 ########################################################################
@@ -35,13 +37,9 @@ sub _build_contexts {
 sub contextualize {
     my ($self,$log) = @_;
 
-    #foreach my $decoder (@{ $self->decoders }) {
-    #    my $data = $decoder->decode($raw);
-    #
-    #    if( defined $data && ref $data eq 'HASH' ) {
-    #        $log->set_decoded($decoder->name => $data);
-    #    }
-    #}
+    foreach my $ctx (@{ $self->contexts }) {
+        $ctx->contextualize_message($log);
+    }
 
     $log;      # Return the log object
 }

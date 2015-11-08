@@ -1,4 +1,4 @@
-package eris::log::decoder::json;
+package eris::log::context::sshd;
 
 use Const::Fast;
 use namespace::autoclean;
@@ -20,13 +20,13 @@ Jul 26 15:50:21 ether sshd[4292]: Disconnecting: Too many authentication failure
 Jul 26 15:50:21 ether sshd[4291]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=43.229.53.60  user=root
 Jul 26 15:50:22 ether sshd[4663]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=43.229.53.60  user=root
 EOF
-    return wantarray ? @msgs : \@msgs;
+    return @msgs;
 }
 
-const my %RE = (
-    extract_details => qr/(?:Accepted|Failed) (\S+) for (\S+) from (\S+) port (\S+) (\S+)$/,
+const my %RE => (
+    extract_details => qr/(?:Accepted|Failed) (\S+) for (\S+) from (\S+) port (\S+) (\S+)/,
 );
-const my %F = (
+const my %F => (
     extract_details => [qw(driver acct src_ip src_port proto)],
 );
 
@@ -34,14 +34,16 @@ sub contextualize_message {
     my ($self,$log) = @_;
     my $str = $log->context->{message};
 
+    print "  + sshd is trying to decode: $str\n";
+
     my %ctxt = ();
-    $ctxt{status} = index('Accepted',$str) >= 0 ? 'success' ?
-                  : index('Failed', $str)  >= 0 ? 'failure' ?
+    $ctxt{status} = index($str,'Accepted') >= 0 ? 'success'
+                  : index($str,'Failed')   >= 0 ? 'failure'
                   : undef;
     if( defined $ctxt{status} ) {
         if( my @data = ($str =~ /$RE{extract_details}/o) ) {
             for(my $i=0; $i < @data; $i++) {
-                $ctxt{$F->{extract_details}[$i]} = $data[$i];
+                $ctxt{$F{extract_details}->[$i]} = $data[$i];
             }
         }
     }
@@ -49,6 +51,8 @@ sub contextualize_message {
         delete $ctxt{status};
     }
 
+    use Data::Dumper;
+    print Dumper \%ctxt;
     $log->add_context($self->name,\%ctxt);
 }
 
