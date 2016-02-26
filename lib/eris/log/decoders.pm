@@ -11,9 +11,9 @@ with qw(
 ########################################################################
 # Attributes
 has 'decoders' => (
-    is => 'ro',
-    isa => 'ArrayRef',
-    lazy => 1,
+    is      => 'ro',
+    isa     => 'ArrayRef',
+    lazy    => 1,
     builder => '_build_decoders',
 );
 
