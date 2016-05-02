@@ -34,5 +34,6 @@ my $ctxr = eris::log::contextualizer->new(
 
 while(<>) {
     chomp;
+    verbose({color=>'cyan'}, $_);
     p($ctxr->parse($_));
 }

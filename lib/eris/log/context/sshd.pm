@@ -34,8 +34,6 @@ sub contextualize_message {
     my ($self,$log) = @_;
     my $str = $log->context->{message};
 
-    print "  + sshd is trying to decode: $str\n";
-
     my %ctxt = ();
     $ctxt{status} = index($str,'Accepted') >= 0 ? 'success'
                   : index($str,'Failed')   >= 0 ? 'failure'
@@ -51,8 +49,6 @@ sub contextualize_message {
         delete $ctxt{status};
     }
 
-    use Data::Dumper;
-    print Dumper \%ctxt;
     $log->add_context($self->name,\%ctxt);
 }
 
