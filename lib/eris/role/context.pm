@@ -37,6 +37,25 @@ has 'priority' => (
     builder => '_build_priority',
 );
 ########################################################################
+# Select our config from the plugin config
+around BUILDARGS => sub {
+    my $orig  = shift;
+    my $class = shift;
+    my %args  = @_;
+
+    my @try = ( $class, (split /::/, $class)[-1] );
+    my %cfg = ();
+    foreach my $try (@try) {
+        print "Trying $try\n";
+        if( exists $args{$try} ) {
+            %cfg = %{ $args{$try} };
+            last;
+        }
+    }
+
+    $class->$orig(%cfg);
+};
+########################################################################
 # Builders
 sub _build_name {
     my ($self) = shift;

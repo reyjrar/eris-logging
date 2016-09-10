@@ -17,13 +17,19 @@ has 'contexts' => (
     lazy    => 1,
     builder => '_build_contexts',
 );
+has 'plugins_config' => (
+    is       => 'ro',
+    isa      => 'HashRef',
+    init_arg => 'plugins',
+    default  => sub {{}},
+);
 ########################################################################
 # Builders
 sub _build_namespace { 'eris::log::context' }
 
 sub _build_contexts {
     my ($self) = @_;
-    return [ sort { $a->priority <=> $b->priority || $a->name cmp $b->name } $self->loader->plugins ];
+    return [ sort { $a->priority <=> $b->priority || $a->name cmp $b->name } $self->loader->plugins( %{ $self->plugins_config } ) ];
 }
 
 ########################################################################
