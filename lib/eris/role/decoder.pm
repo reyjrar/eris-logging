@@ -8,15 +8,16 @@ requires 'decode_message';
 ########################################################################
 # Attributes
 has name => (
-    is => 'ro',
-    isa => 'Str',
-    lazy => 1,
+    is      => 'ro',
+    isa     => 'Str',
+    lazy    => 1,
     builder => '_build_name',
 );
 has priority => (
-    is => 'ro',
-    isa => 'Int',
-    lazy_build => 1,
+    is      => 'ro',
+    isa     => 'Int',
+    lazy    => 1,
+    builder => '_build_priority',
 );
 
 ########################################################################

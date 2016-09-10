@@ -1,22 +1,25 @@
 package eris::log::decoder::syslog;
 
 use Const::Fast;
-use namespace::autoclean;
-# Configure Parse::Syslog::Line
+use Moose;
 use Parse::Syslog::Line;
+
+use namespace::autoclean;
+
+with qw(
+    eris::role::decoder
+);
+
+# Configure Parse::Syslog::Line
 $Parse::Syslog::Line::DateTimeCreate = 0;
 $Parse::Syslog::Line::EpochCreate    = 1;
 $Parse::Syslog::Line::PruneRaw       = 1;
 $Parse::Syslog::Line::PruneEmpty     = 1;
-$Parse::Syslog::Line::PruneFields    = qw(
+@Parse::Syslog::Line::PruneFields    = qw(
     date time date_str message
     preamble facility_int priority_int
 );
 
-use Moose;
-with qw(
-    eris::role::decoder
-);
 sub _build_priority { 100; }
 
 # Mappings we need to make

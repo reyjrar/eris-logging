@@ -24,20 +24,18 @@ has 'field' => (
     lazy    => 1,
     builder => '_build_field',
 );
-has 'target' => (
+has 'matcher' => (
     is      => 'ro',
-    isa     => 'eris::type::target',
+    isa     => 'Defined',
     lazy    => 1,
-    builder => '_build_target',
-    coerce  => 1,
+    builder => '_build_matcher',
 );
-has 'match_all' => (
+has 'priority' => (
     is      => 'ro',
-    isa     => 'Bool',
+    isa     => 'Int',
     lazy    => 1,
-    builder => '_build_match_all'
+    builder => '_build_priority',
 );
-
 ########################################################################
 # Builders
 sub _build_name {
@@ -52,7 +50,8 @@ sub _build_name {
 # By default, we look for program and default to use name, so
 # if I want to write a context for sshd, I just need to create
 # eris::log::context::sshd.
+sub _build_priority { 50 }
 sub _build_field { 'program'; }
-sub _build_target { my ($self) = shift; $self->name; }
+sub _build_matcher { my ($self) = shift; $self->name; }
 
 1;

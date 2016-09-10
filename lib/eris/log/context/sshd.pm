@@ -1,11 +1,19 @@
 package eris::log::context::sshd;
 
 use Const::Fast;
+use Moose;
 use namespace::autoclean;
 
-use Moose;
 with qw(
     eris::role::context
+);
+
+# Constants
+const my %RE => (
+    extract_details => qr/(?:Accepted|Failed) (\S+) for (\S+) from (\S+) port (\S+) (\S+)/,
+);
+const my %F => (
+    extract_details => [qw(driver acct src_ip src_port proto)],
 );
 
 sub sample_messages {
@@ -22,13 +30,6 @@ Jul 26 15:50:22 ether sshd[4663]: pam_unix(sshd:auth): authentication failure; l
 EOF
     return @msgs;
 }
-
-const my %RE => (
-    extract_details => qr/(?:Accepted|Failed) (\S+) for (\S+) from (\S+) port (\S+) (\S+)/,
-);
-const my %F => (
-    extract_details => [qw(driver acct src_ip src_port proto)],
-);
 
 sub contextualize_message {
     my ($self,$log) = @_;

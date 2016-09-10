@@ -1,9 +1,9 @@
 package eris::log::context::postfix;
 
 use Const::Fast;
-use namespace::autoclean;
-
 use Moose;
+
+use namespace::autoclean;
 with qw(
     eris::role::context
 );

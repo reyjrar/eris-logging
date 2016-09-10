@@ -1,7 +1,7 @@
 package eris::dictionary::syslog;
 
-use namespace::autoclean;
 use Moose;
+use namespace::autoclean;
 with qw(
     eris::role::dictionary
     eris::role::dictionary::hash

@@ -1,12 +1,14 @@
 package eris::log::contextualizer;
 
 use Moose;
-use namespace::autoclean;
+use Time::HiRes qw(gettimeofday tv_interval);
 
 use eris::base::types;
 use eris::log::contexts;
 use eris::log::decoders;
 use eris::dictionary;
+
+use namespace::autoclean;
 
 ########################################################################
 # Attributes
@@ -36,7 +38,6 @@ has 'dictionary' => (
     isa     => 'eris::dictionary',
     lazy    => 1,
     builder => '_build_dictionary',
-
 );
 
 ########################################################################
@@ -65,10 +66,16 @@ sub parse {
     my ($self,$raw) = @_;
 
     # Apply the decoders
+    my $t0 = [gettimeofday];
     my $log = $self->decode($raw);
+    my $tdiff = tv_interval($t0);
+    $log->timing->{decoders} = $tdiff;
 
     # Add context
+    $t0 = [gettimeofday];
     $self->contextualize($log);
+    $tdiff = tv_interval($t0);
+    $log->timing->{contexts} = $tdiff;
 
     # Return the log created
     $log;
