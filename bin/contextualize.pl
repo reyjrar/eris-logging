@@ -9,6 +9,7 @@ use Data::Printer;
 use FindBin;
 use Getopt::Long::Descriptive;
 use Path::Tiny;
+use Time::HiRes qw(gettimeofday tv_interval);
 use eris::log::contextualizer;
 
 #------------------------------------------------------------------------#
@@ -35,5 +36,9 @@ my $ctxr = eris::log::contextualizer->new(
 while(<>) {
     chomp;
     verbose({color=>'cyan'}, $_);
-    p($ctxr->parse($_));
+    my $t0 = [gettimeofday];
+    my $l = $ctxr->parse($_);
+    my $tdiff = tv_interval($t0);
+    p($l);
+    output({color=>'cyan'}, sprintf "Took %0.6fs total.", $tdiff);
 }
