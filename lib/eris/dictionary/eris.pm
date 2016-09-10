@@ -32,3 +32,5 @@ mimetype MIME Type of the file
 time_ms Time in millis action took
 response_ms For web requests, total time to send response
 upstream_ms For web requests, total time to get response from upstream service
+src_user Source username
+dst_user Destination username
