@@ -76,7 +76,7 @@ sub set_decoded {
         push @{ $self->tags }, $name;
 
         # Install the context
-        $complete->{$name} = $href;
+        $complete->{$name} = exists $complete->{$name} ? clone_merge( $complete->{$name}, $href ) : $href;
 
         # Grab our dictionary
         $dict ||= eris::dictionary->new;

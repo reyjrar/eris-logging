@@ -63,17 +63,36 @@ sub contextualize_message {
     my %add = ();
     my $ctxt = $log->context;
 
-    foreach my $f ( grep /_ip$/, keys %{ $ctxt } ) {
+    foreach my $f ( keys %{ $ctxt } ) {
+        next unless $f =~ /^(.*)_ip$/;
+        my $add_key = $1 . "_geoip";
+        my %geo = ();
         eval {
             my $city = $self->geo_lookup->city( ip => $ctxt->{$f} );
-            $add{"${f}_city"}  = $city->city->name;
-            $add{"${f}_country"}  = $city->country->iso_code;
+            $geo{city}  = $city->city->name;
+            $geo{country}  = $city->country->iso_code;
+            $geo{continent}  = $city->continent->code;
             my $loc = $city->location();
-            $add{"${f}_location"} = join(',', $loc->latitude, $loc->longitude);
+            $geo{location} = join(',', $loc->latitude, $loc->longitude);
+            my @traits = ();
+            my $traits = $city->traits;
+            if( $traits->is_anonymous_proxy ) {
+                push @traits, qw(anonymous proxy);
+            }
+            elsif( $traits->is_legitimate_proxy ) {
+                push @traits, 'proxy';
+            }
+            elsif( $traits->is_satellite_provider ) {
+                push @traits, 'satellite';
+            }
+            $geo{traits} = \@traits if @traits;
+            my $pc = $city->postal->code;
+            $geo{postal_code} = $pc if $pc;
         } or do {
             my $err = $@;
-            warn sprintf "Geo lookup failed on %s: %s", $ctxt->{$f}, $err;
+            warn sprintf("Geo lookup failed on %s: %s", $ctxt->{$f}, $err) if $self->warnings;
         };
+        $add{$add_key} = \%geo if keys %geo;
     }
 
     $log->add_context($self->name,\%add) if keys %add;

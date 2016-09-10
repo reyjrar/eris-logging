@@ -46,7 +46,6 @@ around BUILDARGS => sub {
     my @try = ( $class, (split /::/, $class)[-1] );
     my %cfg = ();
     foreach my $try (@try) {
-        print "Trying $try\n";
         if( exists $args{$try} ) {
             %cfg = %{ $args{$try} };
             last;

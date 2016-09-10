@@ -34,3 +34,5 @@ response_ms For web requests, total time to send response
 upstream_ms For web requests, total time to get response from upstream service
 src_user Source username
 dst_user Destination username
+src_geoip GeoIP Data for the source IP
+dst_geoip GeoIP Data for the destination IP
