@@ -13,7 +13,7 @@ const my %RE => (
     extract_details => qr/(?:Accepted|Failed) (\S+) for (\S+) from (\S+) port (\S+) (\S+)/,
 );
 const my %F => (
-    extract_details => [qw(driver acct src_ip src_port proto)],
+    extract_details => [qw(driver acct src_ip src_port proto_app)],
 );
 
 sub sample_messages {

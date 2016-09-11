@@ -33,6 +33,10 @@ my $ctxr = eris::log::contextualizer->new(
     config => $opt->config,
 );
 
+foreach my $c ( @{ $ctxr->contexts->contexts } ) {
+    verbose({color=>'magenta'}, sprintf "Loaded context: %s", $c->name);
+}
+
 while(<>) {
     chomp;
     verbose({color=>'cyan'}, $_);

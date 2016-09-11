@@ -2,6 +2,7 @@ package eris::log::decoders;
 
 use eris::log;
 use Moose;
+use Time::HiRes qw(gettimeofday tv_interval);
 use namespace::autoclean;
 
 with qw(
@@ -20,7 +21,7 @@ has 'decoders' => (
 
 ########################################################################
 # Builders
-sub _build_namespace { 'eris::log::decoder'; }
+sub _build_namespace { 'eris::log::decoder' }
 sub _build_decoders {
     my ($self) = @_;
     return [ sort { $a->priority <=> $b->priority } $self->loader->plugins ];
@@ -41,10 +42,14 @@ sub _build_decoders {
 
         # Store the decoded data
         foreach my $decoder (@{ $decoders }) {
+            my $t0 = [gettimeofday];
             my $data = $decoder->decode_message($raw);
+            my $decoder_name = $decoder->name;
             if( defined $data && ref $data eq 'HASH' ) {
-                $log->set_decoded($decoder->name => $data);
+                $log->set_decoded($decoder_name => $data);
             }
+            my $tdiff = tv_interval($t0);
+            $log->timing->{"decoder::$decoder_name"} = $tdiff;
         }
 
         return $log;      # Return the log object

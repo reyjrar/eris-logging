@@ -36,3 +36,4 @@ src_user Source username
 dst_user Destination username
 src_geoip GeoIP Data for the source IP
 dst_geoip GeoIP Data for the destination IP
+attacks Attacks root node

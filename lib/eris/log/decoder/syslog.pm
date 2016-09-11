@@ -46,8 +46,9 @@ sub decode_message {
             }
         }
     };
+    return unless exists $decoded{epoch};
 
-    keys %decoded ? \%decoded : undef;   #Return the Decoded Content
+    return \%decoded;
 }
 
 __PACKAGE__->meta->make_immutable;

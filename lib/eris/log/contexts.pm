@@ -3,6 +3,7 @@ package eris::log::contexts;
 use List::Util qw(any);
 use Moose;
 use Ref::Util qw(is_ref is_arrayref is_coderef is_regexpref);
+use Time::HiRes qw(gettimeofday tv_interval);
 use namespace::autoclean;
 
 with qw(
@@ -55,6 +56,10 @@ sub contextualize {
                 # regexp match
                 $matched = any { /$matcher/ } keys %c;
             }
+            elsif( is_arrayref($matcher) ) {
+                # list match
+                $matched = any { exists $c{$_} } @{ $matcher };
+            }
         }
         elsif( exists $c{$field} ) {
             if( !is_ref($matcher) ) {
@@ -64,6 +69,10 @@ sub contextualize {
             elsif( is_regexpref($matcher) ) {
                 # regexp match
                 $matched = $c{$field} =~ /$matcher/;
+            }
+            elsif( is_arrayref($matcher) ) {
+                # list match
+                $matched = any { $c{$field} eq $_ } @{ $matcher };
             }
             elsif( is_coderef($matcher) ) {
                 # call the code ref
@@ -79,7 +88,13 @@ sub contextualize {
             }
         }
 
-        $ctxt->contextualize_message($log) if $matched;
+        if( $matched ) {
+            my $t0 = [gettimeofday];
+            $ctxt->contextualize_message($log);
+            my $tdiff = tv_interval($t0);
+            my $name = sprintf "context::%s", $ctxt->name;
+            $log->timing->{$name} = $tdiff;
+        }
     }
 
     return $log;      # Return the log object

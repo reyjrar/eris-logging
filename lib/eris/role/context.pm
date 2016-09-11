@@ -59,11 +59,10 @@ around BUILDARGS => sub {
 sub _build_name {
     my ($self) = shift;
     my ($class) = ref $self;
-    my @path = split /\:\:/, defined $class ? $class : '';
+    my ($name) = ($class =~ /eris::log::context::(.+)$/);
+    $name ||= $class;
 
-    die "Bad reference to eris::log::context $class" unless @path > 1;
-
-    return $path[-1];
+    return $name;
 }
 # By default, we look for program and default to use name, so
 # if I want to write a context for sshd, I just need to create

@@ -69,16 +69,18 @@ sub parse {
     my $t0 = [gettimeofday];
     my $log = $self->decode($raw);
     my $tdiff = tv_interval($t0);
-    $log->timing->{decoders} = $tdiff;
+    my $timing = $log->timing;
+    $timing->{decoders} = $tdiff;
 
     # Add context
-    $t0 = [gettimeofday];
+    my $t1 = [gettimeofday];
     $self->contextualize($log);
-    $tdiff = tv_interval($t0);
-    $log->timing->{contexts} = $tdiff;
+    my $t2 = [gettimeofday];
 
+    $timing->{contexts} = tv_interval( $t1, $t2 );
+    $timing->{total}    = tv_interval( $t0, $t2 );
     # Return the log created
-    $log;
+    return $log;
 }
 
 
