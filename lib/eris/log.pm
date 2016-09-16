@@ -95,5 +95,15 @@ sub set_decoded {
         $self->context($ctx);
     }
 }
+
+sub as_doc {
+    my ($self,%args) = @_;
+
+    my $doc = $self->context;
+    $doc->{timing} = $self->timing;
+    $doc->{tags}   = $self->tags;
+
+    return $doc;
+}
 __PACKAGE__->meta->make_immutable;
 1;

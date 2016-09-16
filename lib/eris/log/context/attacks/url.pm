@@ -14,7 +14,6 @@ const my %WEIGHT => (
     xss     => 2,
 );
 my %_RAW = ();
-my %_SUSPICIOUS = ();
 # Not significant on their own
 const my %NeedsMore => map { $_ => 1 } qw(select union update table sleep alter drop delete rand > \\), '&#';
 
@@ -40,9 +39,11 @@ push @xss, map { quotemeta } qw(
 ), '&#';
 $_RAW{xss} = join('|', @xss);
 
+my %_SUSPICIOUS = ();
 foreach my $type (keys %_RAW) {
     $_SUSPICIOUS{$type} = qr/($_RAW{$type})/;
 }
+const %_SUSPICIOUS => %_SUSPICIOUS;
 
 # Config this object
 sub _build_priority { 100 }
@@ -84,7 +85,8 @@ sub contextualize_message {
             }
             else {
                 # Make sure alerting checks the server status
-                my $multiplier = $ctxt->{crit} >= 500 ? 10 :
+                my $multiplier = !exists $ctxt->{crit} ? 1 :
+                                 $ctxt->{crit} >= 500 ? 10 :
                                  $ctxt->{crit} >= 400 ?  5 :
                                  $ctxt->{crit} >= 300 ?  2 : 1;
 
