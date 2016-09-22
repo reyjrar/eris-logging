@@ -49,9 +49,8 @@ sub main_start {
     # Handle to the syslog daemon
     $heap->{io} = POE::Wheel::ReadWrite->new(
         InputHandle  => \*STDIN,
-        OutputHandle => \*STDERR,
+        OutputHandle => \*STDOUT,
         InputFilter  => POE::Filter::Line->new(),
-        OutputFilter => POE::Filter::Line->new(),
         InputEvent   => 'syslog_input',
         ErrorEvent   => 'syslog_error',
     );
@@ -68,12 +67,16 @@ sub main_start {
             $bindir->child('send_to_elasticsearch.pl')->stringify,
             '--config', $opt->config,
         ],
-        StdioFilter => POE::Filter::Line->new(),
+        StdinFilter  => POE::Filter::Line->new(),
+        StdoutFilter => POE::Filter::Reference->new(),
         StatsHandler => sub {
             my ($stats) = @_;
             if( is_hashref($stats) ) {
                 $heap->{stats} = clone_merge( $stats, $heap->{stats} );
             }
+        },
+        StdoutHandler => sub {
+            $kernel->yield(worker_stdout => @_);
         }
     );
 
@@ -91,14 +94,29 @@ sub main_stats {
 
     # Reschedule ourselves;
     $heap->{stats} = {};
-    $kernel->delay( stats => 60 );
+    $kernel->delay( stats => 60 ) unless exists $heap->{_shutdown};
 }
 
 sub worker_stdout {
-    my ($kernel,$heap,$out) = @_[KERNEL,HEAP,ARG0];
+    my ($kernel,$heap,$stats) = @_[KERNEL,HEAP,ARG0];
+
+    # Make sure we have stats
+    return unless defined $stats && is_hashref($stats);
+
+    # Aggregate stats from all our workers
+    foreach my $s (keys %{ $stats }) {
+        $heap->{stats}{$s} ||= 0;
+        $heap->{stats}{$s} += $stats->{$s};
+    }
 }
 
 sub syslog_input {
     my ($kernel,$heap,$msg) = @_[KERNEL,HEAP,ARG0];
     $kernel->post( pool => dispatch => $msg );
+}
+
+sub syslog_error {
+    my ($kernel,$heap) = @_[KERNEL,HEAP];
+    delete $heap->{io};
+    $heap->{_shutdown} = 1;
 }

@@ -13,6 +13,7 @@ use POE qw(
     Component::Client::HTTP
     Wheel::ReadWrite
     Filter::Line
+    Filter::Reference
 );
 use POSIX qw(strftime);
 
@@ -75,9 +76,10 @@ sub main_start {
     # Handle to the syslog daemon
     $heap->{io} = POE::Wheel::ReadWrite->new(
         InputHandle  => \*STDIN,
-        OutputHandle => \*STDERR,
+        OutputHandle => \*STDOUT,
         InputEvent   => 'syslog_input',
         InputFilter  => POE::Filter::Line->new(),
+        OutputFilter => POE::Filter::Reference->new(),
         ErrorEvent   => 'syslog_error',
     );
 
@@ -116,6 +118,11 @@ sub syslog_input {
     push @{ $heap->{bulk_queue} },
         { index => { _index => $index, type => $type } },
         $doc;
+}
+
+sub syslog_error {
+    my ($kernel,$heap) = @_[KERNEL,HEAP];
+    delete $heap->{io};
 }
 
 sub es_mapping {
@@ -241,5 +248,14 @@ sub es_bulk {
 sub es_bulk_response {
     my ($kernel,$heap,$reqs,$resps) = @_[KERNEL,HEAP,ARG0,ARG1];
 
+    # HTTP::Request Object
+    my $req = $reqs->[0];
+
+    # HTTP::Response Object
     my $resp = $resps->[0];
+
+    # Record if this was successful or not
+    my $stat = sprintf "bulk_%s", $resp->is_success ? 'success' : 'error';
+    $heap->{stats}{$stat} ||= 0;
+    $heap->{stats}{$stat}++;
 }
