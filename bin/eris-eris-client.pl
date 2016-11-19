@@ -60,7 +60,6 @@ sub main_start {
 
     # Figure out where we're installed
     my $bindir = path( "$FindBin::RealBin" );
-
     $heap->{workers} = POE::Component::WheelRun::Pool->spawn(
         Alias       => 'pool',
         PoolSize    => $opt->workers,
@@ -90,6 +89,8 @@ sub main_stats {
     my ($kernel,$heap) = @_[KERNEL,HEAP];
 
     my $stats = exists $heap->{stats} ? delete $heap->{stats} : {};
+
+    printf "%s STATS: %s\n", strftime("%H:%M",localtime), join(', ', map { sprintf "%s=%s", $_, $stats->{$_} } keys %{ $stats });
 
     if( exists $heap->{graphite} ) {
         # output to graphite
