@@ -45,19 +45,19 @@ has 'dictionary' => (
 sub _build_decoders {
     my $self = shift;
     return eris::log::decoders->new(
-        %{ $self->config->{decoder} },
+        %{ $self->config->{decoder} || {} },
     );
 }
 sub _build_contexts {
     my $self = shift;
     return eris::log::contexts->new(
-        %{ $self->config->{context} },
+        %{ $self->config->{context} || {} },
     );
 }
 sub _build_dictionary {
     my $self = shift;
     return eris::log::dictionary->new(
-        %{ $self->config->{dictionary} },
+        %{ $self->config->{dictionary} || {} },
     );
 }
 ########################################################################
@@ -66,19 +66,23 @@ sub parse {
     my ($self,$raw) = @_;
 
     # Apply the decoders
+    my %t=();
     my $t0 = [gettimeofday];
     my $log = $self->decode($raw);
     my $tdiff = tv_interval($t0);
-    my $timing = $log->timing;
-    $timing->{decoders} = $tdiff;
+    $t{decoders} = $tdiff;
+
 
     # Add context
     my $t1 = [gettimeofday];
     $self->contextualize($log);
     my $t2 = [gettimeofday];
 
-    $timing->{contexts} = tv_interval( $t1, $t2 );
-    $timing->{total}    = tv_interval( $t0, $t2 );
+    # Record timings
+    $t{contexts} = tv_interval( $t1, $t2 );
+    $t{total}    = tv_interval( $t0, $t2 );
+    $log->add_timing(%t);
+
     # Return the log created
     return $log;
 }

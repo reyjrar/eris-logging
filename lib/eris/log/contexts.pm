@@ -39,6 +39,7 @@ my $_lookup;
 sub contextualize {
     my ($self,$log) = @_;
 
+    my %t = ();
     foreach my $ctxt ( @{ $self->contexts } ) {
         my $field   = $ctxt->field;
         my $matcher = $ctxt->matcher;
@@ -93,9 +94,12 @@ sub contextualize {
             $ctxt->contextualize_message($log);
             my $tdiff = tv_interval($t0);
             my $name = sprintf "context::%s", $ctxt->name;
-            $log->timing->{$name} = $tdiff;
+            $t{$name} = $tdiff;
         }
     }
+
+    # Record timing data
+    $log->add_timing(%t);
 
     return $log;      # Return the log object
 }

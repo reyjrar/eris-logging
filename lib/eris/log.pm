@@ -33,9 +33,9 @@ has complete => (
 );
 has timing => (
     is      => 'rw',
-    isa     => 'HashRef',
+    isa     => 'ArrayRef',
     lazy    => 1,
-    default => sub { {} },
+    default => sub { [] },
 );
 has tags => (
     is      => 'rw',
@@ -94,6 +94,15 @@ sub set_decoded {
         my $ctx = clone_merge( $self->context, \%ok );
         $self->context($ctx);
     }
+}
+
+sub add_timing {
+    my ($self,%args) = @_;
+    my $t = $self->timing;
+    push @{ $t },
+        map { +{ phase => $_, took => $args{$_} } }
+        keys %args;
+    return $self;
 }
 
 sub as_doc {

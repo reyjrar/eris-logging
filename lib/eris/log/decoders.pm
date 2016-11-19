@@ -41,6 +41,7 @@ sub _build_decoders {
         my $log = eris::log->new( raw => $raw );
 
         # Store the decoded data
+        my %t=();
         foreach my $decoder (@{ $decoders }) {
             my $t0 = [gettimeofday];
             my $data = $decoder->decode_message($raw);
@@ -48,9 +49,9 @@ sub _build_decoders {
             if( defined $data && ref $data eq 'HASH' ) {
                 $log->set_decoded($decoder_name => $data);
             }
-            my $tdiff = tv_interval($t0);
-            $log->timing->{"decoder::$decoder_name"} = $tdiff;
+            $t{"decoder::$decoder_name"} = tv_interval($t0);
         }
+        $log->add_timing(%t);
 
         return $log;      # Return the log object
     }

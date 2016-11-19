@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# PODNAME: contextualize.pl
+# PODNAME: eris-context.pl
 # ABSTRACT: Utility for testing the logging contextualizer
 use strict;
 use warnings;

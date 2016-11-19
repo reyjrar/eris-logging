@@ -1,6 +1,6 @@
 
 #!/usr/bin/env perl
-#
+# PODNAME: eris-es-indexer.pl
 use strict;
 use warnings;
 
