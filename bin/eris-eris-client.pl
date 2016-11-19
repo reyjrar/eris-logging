@@ -17,7 +17,8 @@ use POE qw(
 );
 
 my ($opt,$usage) = describe_options('%c - %o',
-    [ 'config:s', 'Eris YAML config file, required', { validate => { "Must be a readable file." => sub { -r $_[0] } } } ],
+    [ 'config:s',   'Eris YAML config file, required', { validate => { "Must be a readable file." => sub { -r $_[0] } } } ],
+    [ 'workers|w:i','Number of workers to run, default 4', { default => 4 }  ],
     [],
     [ 'help',  'Display this help' ],
 );
@@ -62,6 +63,7 @@ sub main_start {
 
     $heap->{workers} = POE::Component::WheelRun::Pool->spawn(
         Alias       => 'pool',
+        PoolSize    => $opt->workers,
         Program     => $^X,
         ProgramArgs => [
             '--',
@@ -85,7 +87,7 @@ sub main_start {
 }
 
 sub main_stats {
-    my ($kernel,$heap) = @_;
+    my ($kernel,$heap) = @_[KERNEL,HEAP];
 
     my $stats = exists $heap->{stats} ? delete $heap->{stats} : {};
 
