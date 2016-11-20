@@ -169,13 +169,14 @@ sub es_check_mapping_resp {
         $mappings = decode_json($resps->[0]->content);
         1;
     } or do {
-        printf STDERR "Invalid JSON from the _template end-point.";
+        printf STDERR "Invalid JSON from the _template end-point.\n";
     };
 
     if( exists $mappings->{$name} ) {
         $heap->{es_ready} = 1;
     }
     else {
+        printf STDERR "Mapping missing, going to attempt creation.\n";
         $kernel->yield( 'es_mapping' );
     }
 }
