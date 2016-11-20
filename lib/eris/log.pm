@@ -100,7 +100,7 @@ sub add_timing {
     my ($self,%args) = @_;
     my $t = $self->timing;
     push @{ $t },
-        map { +{ phase => $_, took => $args{$_} } }
+        map { +{ phase => $_, seconds => $args{$_} } }
         keys %args;
     return $self;
 }

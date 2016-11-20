@@ -27,7 +27,6 @@ my ($opt,$usage) = describe_options('%c - %o',
     [ 'config:s', 'Config file, required.', { validate => { "Must be a readable file" => sub { -r $_[0] } } } ],
     [ 'stats-interval:i',   'Interval in seconds to send statistics, default: 60', { default => 60 }],
     [ 'flush-interval|F:i', 'Interval in seconds to flush the bulk queue, default: 15', { default => 15 } ],
-    [ 'mapping',            'Manage the mapping for the indices.' ],
     [],
     [ 'help',  'Display this help' ],
 );
@@ -56,10 +55,12 @@ my $main_session = POE::Session->create(
             syslog_error => \&syslog_error,
 
             # ElasticSearch Stuff
-            es_bulk         => \&es_bulk,
-            es_bulk_resp    => \&es_bulk_resp,
-            es_mapping      => \&es_mapping,
-            es_mapping_resp => \&es_mapping_resp,
+            es_bulk               => \&es_bulk,
+            es_bulk_resp          => \&es_bulk_resp,
+            es_check_mapping      => \&es_check_mapping,
+            es_check_mapping_resp => \&es_check_mapping_resp,
+            es_mapping            => \&es_mapping,
+            es_mapping_resp       => \&es_mapping_resp,
         },
         heap => {
             es_addr         => 'http://localhost:9200',
@@ -95,12 +96,7 @@ sub main_start {
     $kernel->delay( stats => $opt->stats_interval );
 
     # Handle the Mapping bits?
-    if( $opt->mapping ) {
-        $kernel->yield('es_mapping');
-    }
-    else {
-        $heap->{es_ready} = 1;
-    }
+    $kernel->yield('es_check_mapping');
 }
 
 sub main_stats {
@@ -154,26 +150,48 @@ sub syslog_error {
     delete $heap->{io};
 }
 
+sub es_check_mapping {
+    my ($kernel,$heap) = @_[KERNEL,HEAP];
+    my $mapping_name = sprintf "%s_mapping", $heap->{es_mapping_name};
+
+    my $req = App::ElasticSearch::Utilities::HTTPRequest->new(GET => sprintf("%s/_template/",$heap->{es_addr}));
+    $kernel->post( ua => request => es_check_mapping_resp => $req, $mapping_name );
+}
+
+sub es_check_mapping_resp {
+    my ($kernel,$heap,$reqs,$resps) = @_[KERNEL,HEAP,ARG0,ARG1];
+
+    # Check Mapping Name Against Return
+    my $name = $reqs->[1];
+
+    my $mappings = {};
+    eval {
+        $mappings = decode_json($resps->[0]->content);
+        1;
+    } or do {
+        printf STDERR "Invalid JSON from the _template end-point.";
+    };
+
+    if( exists $mappings->{$name} ) {
+        $heap->{es_ready} = 1;
+    }
+    else {
+        $kernel->yield( 'es_mapping' );
+    }
+}
+
 sub es_mapping {
     my ($kernel,$heap) = @_[KERNEL,HEAP];
     my %mapping = (
         template => "$heap->{es_mapping_name}-*",
         settings => {
             'index.query.default_field' => 'message',
+            'index.mapping.ignore_malformed' => 'yes',
         },
         mappings => {
             _default_ => {
                 _all => { enabled => 'false' },
-                _source => { compress => 'false' },
                 dynamic_templates => [
-                    { timing_template => {
-                        path_match => 'timing.*',
-                        mapping => {
-                            type       => 'float',
-                            index      => 'not_analyzed',
-                            doc_values => 'true',
-                        }
-                    }},
                     { geoip_template => {
                         match   => '*_geoip',
                         mapping => {
@@ -185,7 +203,7 @@ sub es_mapping {
                                 country     => { type => 'string', index => 'not_analyzed' },
                                 continent   => { type => 'string', index => 'not_analyzed' },
                                 postal_code => { type => 'string', index => 'not_analyzed' },
-                                location    => { type => 'geopoint', lat_lon => 'true', 'ignore_malformed' => 'yes' },
+                                location    => { type => 'geopoint', lat_lon => 'true' },
                             }
                         },
                     }},
@@ -216,6 +234,14 @@ sub es_mapping {
                     }},
                 ],
                 properties => {
+                    timing => {
+                        type => 'nested',
+                        dynamic => 'false',
+                        properties => {
+                            phase => { type => 'string', index => 'not_analyzed', ignore_above => 80 },
+                            seconds => { type => 'float' },
+                        }
+                    },
                     'timestamp' => {
                         type       => 'date',
                         format     => 'dateTime',
@@ -234,7 +260,7 @@ sub es_mapping {
     );
 
     # Build the Request
-    my $req = App::ElasticSearch::Utilities::HTTPRequest->new(PUT => sprintf("%s/_template/%s",$heap->{es_addr},$heap->{es_mapping_name}));
+    my $req = App::ElasticSearch::Utilities::HTTPRequest->new(PUT => sprintf("%s/_template/%s_mapping",$heap->{es_addr},$heap->{es_mapping_name}));
     $req->content(\%mapping);
 
     # Submmit it
