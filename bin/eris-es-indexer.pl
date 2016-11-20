@@ -5,6 +5,7 @@ use strict;
 use warnings;
 
 use App::ElasticSearch::Utilities::HTTPRequest;
+use Data::GUID qw(guid_string);
 use FindBin;
 use Getopt::Long::Descriptive;
 use JSON::MaybeXS;
@@ -23,7 +24,10 @@ use eris::log::contextualizer;
 
 # Options
 my ($opt,$usage) = describe_options('%c - %o',
-    [ 'config:s', 'Config file, required.', { required => 1, validate => { "Must be a readable file" => sub { -r $_[0] } } } ],
+    [ 'config:s', 'Config file, required.', { validate => { "Must be a readable file" => sub { -r $_[0] } } } ],
+    [ 'stats-interval:i',   'Interval in seconds to send statistics, default: 60', { default => 60 }],
+    [ 'flush-interval|F:i', 'Interval in seconds to flush the bulk queue, default: 15', { default => 15 } ],
+    [ 'mapping',            'Manage the mapping for the indices.' ],
     [],
     [ 'help',  'Display this help' ],
 );
@@ -33,8 +37,11 @@ if( $opt->help ) {
 }
 
 # Global
-my $eris = eris::log::contextualizer->new(config => $opt->config);
+my $eris = eris::log::contextualizer->new(
+    $opt->config ? ( config => $opt->config ) : (),
+);
 
+# POE Sessions
 my $http_session = POE::Component::Client::HTTP->spawn(
     Alias   => 'ua',
     Timeout => 60,
@@ -58,8 +65,10 @@ my $main_session = POE::Session->create(
             es_addr         => 'http://localhost:9200',
             es_mapping_name => 'syslog',
             es_default_type => 'syslog',
+            es_ready        => 0,
             stats           => {},
             bulk_queue      => [],
+            batch_size      => {},
         },
 );
 
@@ -83,17 +92,35 @@ sub main_start {
         ErrorEvent   => 'syslog_error',
     );
 
-    $kernel->delay( stats => 60 );
+    $kernel->delay( stats => $opt->stats_interval );
+
+    # Handle the Mapping bits?
+    if( $opt->mapping ) {
+        $kernel->yield('es_mapping');
+    }
+    else {
+        $heap->{es_ready} = 1;
+    }
 }
 
 sub main_stats {
-    my ($kernel,$heap) = @_;
+    my ($kernel,$heap) = @_[KERNEL,HEAP];
 
-    my $stats = delete $heap->{stats};
-    printf "%s STATS: %s". strftime('%T', localtime), join(', ', map { "$_=$stats->{$_}" } sort keys %{ $stats });
+    my $stats = exists $heap->{stats} ? delete $heap->{stats} : {};
 
+    # Collection of the outstanding batches
+    foreach my $id ( keys %{ $heap->{batch_size} } ) {
+        $stats->{pending} ||= 0;
+        $stats->{pending} += $heap->{batch_size}{$id};
+    }
+
+    # Send the stats upstream
+    #printf STDERR "%s STATS: %s\n", strftime('%T', localtime), join(', ', map { "$_=$stats->{$_}" } sort keys %{ $stats });
+    $heap->{io}->put( $stats );
+
+    # Reset the stats
     $heap->{stats} = {};
-    $kernel->delay( stats => 60 );
+    $kernel->delay( stats => $opt->stats_interval );
 }
 
 sub syslog_input {
@@ -116,8 +143,10 @@ sub syslog_input {
     $heap->{stats}{queued}++;
 
     push @{ $heap->{bulk_queue} },
-        { index => { _index => $index, type => $type } },
+        { index => { _index => $index, _type => $type } },
         $doc;
+
+    $kernel->delay( es_bulk => $opt->flush_interval ) unless exists $heap->{_bulk_started};
 }
 
 sub syslog_error {
@@ -222,7 +251,7 @@ sub es_mapping_resp {
         $heap->{es_ready} = 1;
     }
     else {
-        printf STDERR "[es_mapping] ERROR: %d HTTP Response, %s", $resp->code, $resp->content ? $resp->content : "failed";
+        printf STDERR "[es_mapping] ERROR: %d HTTP Response, %s\n", $resp->code, $resp->content ? $resp->content : "failed";
     }
 }
 
@@ -231,25 +260,37 @@ sub es_bulk {
 
     my $bulk = delete $heap->{bulk_queue};
 
-    if( $heap->{es_ready} ) {
-        my $req = App::ElasticSearch::Utilities::HTTPRequest->new(POST => sprintf "%s/_bulk", $heap->{es_addr});
-        $req->content($bulk);
-        $kernel->post( ua => request => es_bulk_resp => $req );
+    # Only process and reschedule if we have data
+    if( my $ops = scalar @{ $bulk } ) {
+        if( $heap->{es_ready} ) {
+            my $req = App::ElasticSearch::Utilities::HTTPRequest->new(POST => sprintf "%s/_bulk", $heap->{es_addr});
+            $req->content($bulk);
+            my $guid = guid_string();
+            $heap->{batch_size}{$guid} = $ops / 2;
+            $kernel->post( ua => request => es_bulk_resp => $req, $guid );
+        }
+        else {
+            $heap->{stats}{discarded} ||= 0;
+            $heap->{stats}{discarded} += scalar( @{$bulk} ) / 2;
+        }
+        $kernel->delay( es_bulk => $opt->flush_interval );
     }
     else {
-        $heap->{stats}{discarded} ||= 0;
-        $heap->{stats}{discarded} += scalar( @{$bulk} ) / 2;
+        delete $heap->{_bulk_started};
     }
 
     $heap->{bulk_queue} = [];
-    $kernel->delay( es_flush => 15 );
 }
 
-sub es_bulk_response {
+sub es_bulk_resp {
     my ($kernel,$heap,$reqs,$resps) = @_[KERNEL,HEAP,ARG0,ARG1];
 
     # HTTP::Request Object
-    my $req = $reqs->[0];
+    my $req  = $reqs->[0];
+    my $guid = $reqs->[1];
+
+    # Lookup and delete how many docs in the batch
+    my $docs = exists $heap->{batch_size}{$guid} ? delete $heap->{batch_size}{$guid} : 1;
 
     # HTTP::Response Object
     my $resp = $resps->[0];
@@ -257,5 +298,11 @@ sub es_bulk_response {
     # Record if this was successful or not
     my $stat = sprintf "bulk_%s", $resp->is_success ? 'success' : 'error';
     $heap->{stats}{$stat} ||= 0;
-    $heap->{stats}{$stat}++;
+    $heap->{stats}{$stat} += $docs;
+
+    # Spew errors to the parent on STDERR
+    unless( $resp->is_success ) {
+        print STDERR $resp->content;
+        print STDERR $req->content;
+    }
 }

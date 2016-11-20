@@ -14,8 +14,8 @@ coerce  'eris::type::config'
         my $config = {};
         if ( -f $file ) {
             eval {
-            $config = YAML::LoadFile($file);
-            1;
+                $config = YAML::LoadFile($file);
+                1;
             } or die "unable to parse YAML file: $file, $@";
         }
         return $config;

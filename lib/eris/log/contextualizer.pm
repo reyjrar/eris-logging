@@ -15,8 +15,8 @@ use namespace::autoclean;
 has config => (
     is       => 'ro',
     isa      => 'eris::type::config',
-    required => 1,
     coerce   => 1,
+    default  => sub { +{} },
 );
 has contexts => (
     is      => 'ro',
