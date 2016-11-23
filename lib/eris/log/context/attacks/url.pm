@@ -1,7 +1,7 @@
 package eris::log::context::attacks::url;
 
 use Const::Fast;
-use Moose;
+use Moo;
 
 use namespace::autoclean;
 with qw(
@@ -100,5 +100,4 @@ sub contextualize_message {
     $log->add_context($self->name,{ attacks => \%add }) if keys %add;
 }
 
-__PACKAGE__->meta->make_immutable;
 1;

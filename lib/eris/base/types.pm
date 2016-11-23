@@ -1,15 +1,17 @@
 package eris::base::types;
 
-use Moose;
-use Moose::Util::TypeConstraints;
+use Type::Library
+    -base,
+    -declare => qw(HashRefFromYAML);
+use Type::Utils -all;
+use Types::Standard -types;
 use YAML;
 
 # Config File to HashRef Conversion
-subtype 'eris::type::config',
-    as 'HashRef';
-coerce  'eris::type::config'
-    => from 'Str'
-    => via {
+declare_coercion "HashRefFromYAML",
+    to_type HashRef,
+    from Str,
+    q|
         my $file = $_;
         my $config = {};
         if ( -f $file ) {
@@ -19,7 +21,7 @@ coerce  'eris::type::config'
             } or die "unable to parse YAML file: $file, $@";
         }
         return $config;
-    };
+    |;
 
-__PACKAGE__->meta->make_immutable;
+# Return True
 1;

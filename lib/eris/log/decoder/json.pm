@@ -2,7 +2,7 @@ package eris::log::decoder::json;
 
 use Const::Fast;
 use JSON::MaybeXS;
-use Moose;
+use Moo;
 use namespace::autoclean;
 
 with qw(
@@ -26,5 +26,4 @@ sub decode_message {
     return $decoded;
 }
 
-__PACKAGE__->meta->make_immutable;
 1;

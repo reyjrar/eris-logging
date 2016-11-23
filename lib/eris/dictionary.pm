@@ -1,10 +1,11 @@
 package eris::dictionary;
 
-use namespace::autoclean;
-use MooseX::Singleton;
+use Moo;
 with qw(
     eris::role::pluggable
+    MooX::Singleton
 );
+use namespace::autoclean;
 
 ########################################################################
 # Attributes
@@ -22,12 +23,11 @@ sub lookup {
 
     # Otherwise, lookup
     my $entry;
-    foreach my $p (sort { $a->priority <=> $b->priority } $self->loader->plugins ) {
+    foreach my $p (@{ $self->plugins }) {
         $entry = $p->lookup($field);
         last if defined $entry;
     }
     defined $entry ? $_dict{$field} = $entry : undef;  # Assignment carries Left to Right and is returned;
 }
 
-__PACKAGE__->meta->make_immutable;
 1;

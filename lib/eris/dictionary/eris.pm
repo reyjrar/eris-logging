@@ -1,9 +1,8 @@
 package eris::dictionary::eris;
 
-use Moose;
+use Moo;
 use namespace::autoclean;
 with qw(
-    eris::role::dictionary
     eris::role::dictionary::hash
 );
 sub _build_priority { 100; }
@@ -18,7 +17,6 @@ sub hash {
     }
     $_hash = \%data;
 }
-__PACKAGE__->meta->make_immutable;
 1;
 __DATA__
 source The source of the message

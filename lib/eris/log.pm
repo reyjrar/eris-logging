@@ -1,7 +1,8 @@
 package eris::log;
 
 use Hash::Merge::Simple qw(clone_merge);
-use Moose;
+use Moo;
+use Types::Standard qw(ArrayRef HashRef Str);
 use Ref::Util qw(is_hashref);
 
 use eris::dictionary;
@@ -10,36 +11,36 @@ use namespace::autoclean;
 
 has raw => (
     is       => 'ro',
-    isa      => 'Str',
+    isa      => Str,
     required => 1,
 );
 has decoded => (
     is      => 'rw',
-    isa     => 'HashRef',
+    isa     => HashRef,
     lazy    => 1,
     default => sub { {} },
 );
 has context => (
     is      => 'rw',
-    isa     => 'HashRef',
+    isa     => HashRef,
     lazy    => 1,
     default => sub { {} },
 );
 has complete => (
     is      => 'rw',
-    isa     => 'HashRef[HashRef]',
+    isa     => HashRef[HashRef],
     lazy    => 1,
     default => sub { {} },
 );
 has timing => (
     is      => 'rw',
-    isa     => 'ArrayRef',
+    isa     => ArrayRef,
     lazy    => 1,
     default => sub { [] },
 );
 has tags => (
     is      => 'rw',
-    isa     => 'ArrayRef',
+    isa     => ArrayRef,
     lazy    => 1,
     default => sub { [] },
 );
@@ -79,7 +80,7 @@ sub set_decoded {
         $complete->{$name} = exists $complete->{$name} ? clone_merge( $complete->{$name}, $href ) : $href;
 
         # Grab our dictionary
-        $dict ||= eris::dictionary->new;
+        $dict ||= eris::dictionary->instance;
 
         # Complete merge
         my %ok = ();
@@ -114,5 +115,4 @@ sub as_doc {
 
     return $doc;
 }
-__PACKAGE__->meta->make_immutable;
 1;

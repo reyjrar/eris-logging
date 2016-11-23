@@ -1,9 +1,8 @@
 package eris::dictionary::cee;
 
-use Moose;
+use Moo;
 use namespace::autoclean;
 with qw(
-    eris::role::dictionary
     eris::role::dictionary::hash
 );
 
@@ -18,7 +17,6 @@ sub hash {
     }
     $_hash = \%data;
 }
-__PACKAGE__->meta->make_immutable;
 1;
 __DATA__
 acct Account Username

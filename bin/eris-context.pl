@@ -22,18 +22,15 @@ my ($opt,$usage) = describe_options(
     "%c %o ",
     [],
     [ 'config|c:s', "eris config file", {
-        default => $path_base->child('eris.yml')->realpath->canonpath,
         callbacks => { exists => sub { -f shift } }
     }],
 );
 
 #------------------------------------------------------------------------#
 # Main
-my $ctxr = eris::log::contextualizer->new(
-    config => $opt->config,
-);
+my $ctxr = eris::log::contextualizer->new( $opt->config ? (config => $opt->config) : () );
 
-foreach my $c ( @{ $ctxr->contexts->contexts } ) {
+foreach my $c ( @{ $ctxr->contexts->plugins } ) {
     verbose({color=>'magenta'}, sprintf "Loaded context: %s", $c->name);
 }
 

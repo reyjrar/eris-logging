@@ -1,23 +1,18 @@
 package eris::role::dictionary;
 
-use Moose::Role;
+use Moo::Role;
+use Types::Standard qw(Int Str);
 use namespace::autoclean;
 
+########################################################################
+# Interface
 requires qw(lookup);
+with qw(
+    eris::role::plugin
+);
 
 ########################################################################
 # Attributes
-has name => (
-    is      => 'ro',
-    isa     => 'Str',
-    lazy    => 1,
-    builder => '_build_name',
-);
-has priority => (
-    is         => 'ro',
-    isa        => 'Int',
-    lazy_build => 1,
-);
 
 ########################################################################
 # Builders
@@ -30,7 +25,6 @@ sub _build_name {
 
     return $path[-1];
 }
-sub _build_priority  { 50; }
 
 
 ########################################################################

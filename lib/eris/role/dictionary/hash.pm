@@ -1,9 +1,10 @@
 package eris::role::dictionary::hash;
 
-use Moose::Role;
+use Moo::Role;
 use namespace::autoclean;
 
 requires qw(hash);
+with qw(eris::role::dictionary);
 
 sub lookup {
     my ($self,$field) = @_;

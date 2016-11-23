@@ -1,9 +1,10 @@
 package eris::log::contextualizer;
 
-use Moose;
+use Moo;
 use Time::HiRes qw(gettimeofday tv_interval);
+use Types::Standard qw( HashRef InstanceOf );
 
-use eris::base::types;
+use eris::base::types qw( HashRefFromYAML );
 use eris::log::contexts;
 use eris::log::decoders;
 use eris::dictionary;
@@ -14,20 +15,20 @@ use namespace::autoclean;
 # Attributes
 has config => (
     is       => 'ro',
-    isa      => 'eris::type::config',
-    coerce   => 1,
+    isa      => HashRef,
+    coerce   => HashRefFromYAML,
     default  => sub { +{} },
 );
 has contexts => (
     is      => 'ro',
-    isa     => 'eris::log::contexts',
+    isa     => InstanceOf['eris::log::contexts'],
     handles => [qw(contextualize)],
     lazy    => 1,
     builder => '_build_contexts',
 );
 has 'decoders' => (
     is      => 'ro',
-    isa     => 'eris::log::decoders',
+    isa     => InstanceOf['eris::log::decoders'],
     handles => [qw(decode)],
     lazy    => 1,
     builder => '_build_decoders',
@@ -35,7 +36,7 @@ has 'decoders' => (
 );
 has 'dictionary' => (
     is      => 'ro',
-    isa     => 'eris::dictionary',
+    isa     => InstanceOf['eris::dictionary'],
     lazy    => 1,
     builder => '_build_dictionary',
 );
@@ -56,7 +57,7 @@ sub _build_contexts {
 }
 sub _build_dictionary {
     my $self = shift;
-    return eris::log::dictionary->new(
+    return eris::dictionary->instance(
         %{ $self->config->{dictionary} || {} },
     );
 }
@@ -88,5 +89,4 @@ sub parse {
 }
 
 
-__PACKAGE__->meta->make_immutable;
 1;

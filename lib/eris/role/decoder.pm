@@ -1,24 +1,18 @@
 package eris::role::decoder;
 
-use Moose::Role;
+use Moo::Role;
+use Types::Standard qw( Str Int );
 use namespace::autoclean;
-
-requires 'decode_message';
 
 ########################################################################
 # Attributes
-has name => (
-    is      => 'ro',
-    isa     => 'Str',
-    lazy    => 1,
-    builder => '_build_name',
+requires 'decode_message';
+with qw(
+    eris::role::plugin
 );
-has priority => (
-    is      => 'ro',
-    isa     => 'Int',
-    lazy    => 1,
-    builder => '_build_priority',
-);
+
+########################################################################
+# Attributes
 
 ########################################################################
 # Builders
@@ -31,6 +25,5 @@ sub _build_name {
 
     return $path[-1];
 }
-sub _build_priority  { 50; }
 
 1;

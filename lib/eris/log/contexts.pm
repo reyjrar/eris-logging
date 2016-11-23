@@ -1,9 +1,10 @@
 package eris::log::contexts;
 
 use List::Util qw(any);
-use Moose;
+use Moo;
 use Ref::Util qw(is_ref is_arrayref is_coderef is_regexpref);
 use Time::HiRes qw(gettimeofday tv_interval);
+use Types::Standard qw( ArrayRef HashRef );
 use namespace::autoclean;
 
 with qw(
@@ -12,26 +13,10 @@ with qw(
 
 ########################################################################
 # Attributes
-has 'contexts' => (
-    is      => 'ro',
-    isa     => 'ArrayRef',
-    lazy    => 1,
-    builder => '_build_contexts',
-);
-has 'plugins_config' => (
-    is       => 'ro',
-    isa      => 'HashRef',
-    init_arg => 'plugins',
-    default  => sub {{}},
-);
+
 ########################################################################
 # Builders
 sub _build_namespace { 'eris::log::context' }
-
-sub _build_contexts {
-    my ($self) = @_;
-    return [ sort { $a->priority <=> $b->priority || $a->name cmp $b->name } $self->loader->plugins( %{ $self->plugins_config } ) ];
-}
 
 ########################################################################
 # Methods
@@ -40,7 +25,7 @@ sub contextualize {
     my ($self,$log) = @_;
 
     my %t = ();
-    foreach my $ctxt ( @{ $self->contexts } ) {
+    foreach my $ctxt ( @{ $self->plugins } ) {
         my $field   = $ctxt->field;
         my $matcher = $ctxt->matcher;
         my $matched;
@@ -104,5 +89,4 @@ sub contextualize {
     return $log;      # Return the log object
 }
 
-__PACKAGE__->meta->make_immutable;
 1;

@@ -1,8 +1,9 @@
 package eris::log::decoders;
 
 use eris::log;
-use Moose;
+use Moo;
 use Time::HiRes qw(gettimeofday tv_interval);
+use Types::Standard qw(ArrayRef);
 use namespace::autoclean;
 
 with qw(
@@ -12,20 +13,10 @@ with qw(
 
 ########################################################################
 # Attributes
-has 'decoders' => (
-    is      => 'ro',
-    isa     => 'ArrayRef',
-    lazy    => 1,
-    builder => '_build_decoders',
-);
 
 ########################################################################
 # Builders
 sub _build_namespace { 'eris::log::decoder' }
-sub _build_decoders {
-    my ($self) = @_;
-    return [ sort { $a->priority <=> $b->priority } $self->loader->plugins ];
-}
 
 ########################################################################
 # Methods
@@ -35,7 +26,7 @@ sub _build_decoders {
         my ($self,$raw) = @_;
 
         # Initialize the decoders
-        $decoders //= $self->decoders;
+        $decoders //= $self->plugins;
 
         # Create the log entry
         my $log = eris::log->new( raw => $raw );
@@ -57,5 +48,4 @@ sub _build_decoders {
     }
 } # end closure
 
-__PACKAGE__->meta->make_immutable;
 1;

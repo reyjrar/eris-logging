@@ -1,6 +1,7 @@
 package eris::role::pluggable;
 
-use Moose::Role;
+use Moo::Role;
+use Types::Standard qw(ArrayRef HashRef InstanceOf Str);
 use namespace::autoclean;
 use Module::Pluggable::Object;
 
@@ -8,30 +9,39 @@ use Module::Pluggable::Object;
 # Attributes
 has namespace => (
     is      => 'ro',
-    isa     => 'Str',
+    isa     => Str,
     lazy    => 1,
     builder => '_build_namespace',
 );
 has search_path => (
     is      => 'ro',
-    isa     => 'ArrayRef[Str]',
+    isa     => ArrayRef[Str],
     lazy    => 1,
     default => sub { [] },
 );
 has disabled => (
     is      => 'ro',
-    isa     => 'ArrayRef[Str]',
+    isa     => ArrayRef[Str],
     lazy    => 1,
     default => sub { [] },
 );
 has 'loader' => (
     is      => 'ro',
-    isa     => 'Module::Pluggable::Object',
+    isa     => InstanceOf['Module::Pluggable::Object'],
     lazy    => 1,
     builder => '_build_loader',
-    handles => [qw(plugins)],
 );
-
+has 'plugins' => (
+    is => 'ro',
+    isa => ArrayRef,
+    lazy => 1,
+    builder => '_build_plugins',
+);
+has 'plugins_config' => (
+    is       => 'ro',
+    isa      => HashRef,
+    default  => sub {{}},
+);
 ########################################################################
 # Builders
 sub _build_loader {
@@ -44,4 +54,8 @@ sub _build_loader {
     return $loader;
 }
 
+sub _build_plugins {
+    my $self = shift;
+    return [ sort { $a->priority <=> $b->priority || $a->name cmp $b->name } $self->loader->plugins( %{ $self->plugins_config } ) ];
+}
 1;

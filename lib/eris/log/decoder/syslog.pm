@@ -1,7 +1,7 @@
 package eris::log::decoder::syslog;
 
 use Const::Fast;
-use Moose;
+use Moo;
 use Parse::Syslog::Line;
 
 use namespace::autoclean;
@@ -51,5 +51,4 @@ sub decode_message {
     return \%decoded;
 }
 
-__PACKAGE__->meta->make_immutable;
 1;

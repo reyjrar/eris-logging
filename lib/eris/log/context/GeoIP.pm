@@ -2,7 +2,8 @@ package eris::log::context::GeoIP;
 
 use Const::Fast;
 use GeoIP2::Database::Reader;
-use Moose;
+use Moo;
+use Types::Standard qw(Any Bool Str);
 
 use namespace::autoclean;
 with qw(
@@ -11,17 +12,18 @@ with qw(
 
 has 'geo_db' => (
     is      => 'ro',
-    isa     => 'Str',
+    isa     => Str,
     default => '/tmp/GeoLite2-City.mmdb',
 );
 has 'geo_lookup' => (
     is      => 'ro',
+    isa     => Any,
     lazy    => 1,
     builder => '_build_geo_lookup',
 );
 has 'warnings' => (
     is      => 'rw',
-    isa     => 'Bool',
+    isa     => Bool,
     default => 0,
 );
 
@@ -98,5 +100,4 @@ sub contextualize_message {
     $log->add_context($self->name,\%add) if keys %add;
 }
 
-__PACKAGE__->meta->make_immutable;
 1;

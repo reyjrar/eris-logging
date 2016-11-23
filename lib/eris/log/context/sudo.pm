@@ -1,7 +1,7 @@
 package eris::log::context::sudo;
 
 use Const::Fast;
-use Moose;
+use Moo;
 
 use namespace::autoclean;
 with qw(
@@ -44,5 +44,4 @@ sub contextualize_message {
     $log->add_context($self->name,\%ctxt);
 }
 
-__PACKAGE__->meta->make_immutable;
 1;
