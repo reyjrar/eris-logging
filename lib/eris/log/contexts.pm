@@ -50,7 +50,7 @@ sub contextualize {
         elsif( exists $c{$field} ) {
             if( !is_ref($matcher) ) {
                 # Simplest case, we're a string
-                $matched = $c{$field} eq $matcher;
+                $matched = lc $c{$field} eq lc $matcher;
             }
             elsif( is_regexpref($matcher) ) {
                 # regexp match
@@ -58,7 +58,7 @@ sub contextualize {
             }
             elsif( is_arrayref($matcher) ) {
                 # list match
-                $matched = any { $c{$field} eq $_ } @{ $matcher };
+                $matched = any { lc $c{$field} eq lc $_ } @{ $matcher };
             }
             elsif( is_coderef($matcher) ) {
                 # call the code ref

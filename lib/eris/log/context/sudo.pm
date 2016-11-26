@@ -2,15 +2,14 @@ package eris::log::context::sudo;
 
 use Const::Fast;
 use Moo;
-
-use namespace::autoclean;
 with qw(
     eris::role::context
 );
+use namespace::autoclean;
 
 const my %MAP => (
     TTY     => 'dev',
-    COMMAND => 'action',
+    COMMAND => 'exe',
     PWD     => 'location',
     USER    => 'dst_user',
 );
@@ -38,6 +37,10 @@ sub contextualize_message {
                 $ctxt{$MAP{$k}} = $v;
             }
         }
+    }
+    if( exists $ctxt{exe} ) {
+        $ctxt{file} = (split /\s+/, $ctxt{exe})[0];
+        $ctxt{action} = 'exec';
     }
     $ctxt{src_user} = $user if $user;
 

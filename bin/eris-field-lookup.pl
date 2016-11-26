@@ -20,20 +20,30 @@ my $path_base = path("$FindBin::Bin")->parent;
 # Argument Parsing
 my ($opt,$usage) = describe_options(
     "%c %o <fields to lookup>",
+    [ 'list|l',     "list all available fields" ],
     [],
     [ 'config|c:s', "eris config file", {
-        default => $path_base->child('eris.yml')->realpath->canonpath,
         callbacks => { exists => sub { -f shift } }
     }],
 );
-die $usage->text unless @ARGV;
 
 #------------------------------------------------------------------------#
 # Main
-my $cfg = YAML::LoadFile($opt->config) || {};
+my $cfg = $opt->config ? YAML::LoadFile($opt->config) : {};
 my %args = exists $cfg->{dictionary} && ref $cfg->{dictionary} eq 'HASH' ? %{ $cfg->{dictionary} } : ();
-my $dict = eris::dictionary->initialize(%args);
+my $dict = eris::dictionary->instance(%args);
 
+if( $opt->list ) {
+    my $fields = $dict->fields;
+    output({color=>'cyan'}, sprintf "Found %d fields in the dictionary.", scalar(keys %{ $fields }));
+    foreach my $f (sort keys %{ $fields }) {
+        my $F = $dict->lookup($f);
+        output({indent=>1}, sprintf "%s (%s) %s", $f, $fields->{$f}, $F->{description});
+    }
+    exit 0;
+}
+
+die $usage->text unless @ARGV;
 foreach my $field (@ARGV) {
     output({clear=>1,color=>'yellow'}, "Looking up '$field'");
     p( $dict->lookup($field) );

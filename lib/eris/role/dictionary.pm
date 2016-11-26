@@ -6,7 +6,7 @@ use namespace::autoclean;
 
 ########################################################################
 # Interface
-requires qw(lookup);
+requires qw(lookup fields);
 with qw(
     eris::role::plugin
 );

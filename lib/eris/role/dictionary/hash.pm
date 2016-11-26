@@ -20,4 +20,10 @@ sub lookup {
     return $entry;
 }
 
+sub fields {
+    my ($self) = @_;
+
+    return [ sort keys %{ $self->hash }  ];
+}
+
 1;

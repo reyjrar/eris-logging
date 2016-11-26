@@ -5,14 +5,40 @@ with qw(
     eris::role::pluggable
     MooX::Singleton
 );
+use Types::Standard qw(HashRef);
 use namespace::autoclean;
 
 ########################################################################
 # Attributes
+has fields => (
+    is => 'ro',
+    isa => HashRef,
+    lazy => 1,
+    builder => '_build_fields',
+);
 
 ########################################################################
 # Builders
 sub _build_namespace { 'eris::dictionary' }
+sub _build_fields {
+    my ($self) = @_;
+
+    my %complete = ();
+    foreach my $p ( @{ $self->plugins } ) {
+        foreach my $f ( @{ $p->fields } ) {
+            if( exists $complete{$f} ) {
+                warn sprintf "Duplicated field '%s' in dictionaies, %s authoratitive, %s conflicting.",
+                    $f,
+                    $complete{$f},
+                    $p->name;
+                    next;
+            }
+            $complete{$f} = $p->name;
+        }
+    }
+
+    return \%complete;
+}
 
 ########################################################################
 # Methods
