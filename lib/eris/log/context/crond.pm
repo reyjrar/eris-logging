@@ -6,6 +6,10 @@ with qw(
 );
 use namespace::autoclean;
 
+sub _build_matcher {
+    [qw(crond cron CROND /usr/sbin/cron)]
+}
+
 sub sample_messages {
     my @msgs = split /\r?\n/, <<'EOF';
 Nov 24 01:00:01 janus CROND[30472]: (root) CMD (/usr/lib64/sa/sa1 1 1)

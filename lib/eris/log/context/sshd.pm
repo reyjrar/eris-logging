@@ -27,6 +27,7 @@ Jul 26 15:50:21 ether sshd[4291]: Failed password for root from 43.229.53.60 por
 Jul 26 15:50:21 ether sshd[4292]: Disconnecting: Too many authentication failures for root
 Jul 26 15:50:21 ether sshd[4291]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=43.229.53.60  user=root
 Jul 26 15:50:22 ether sshd[4663]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=43.229.53.60  user=root
+Jul 26 15:50:21 ether sshd[4291]: Invalid user trudy from 43.229.53.60
 EOF
     return @msgs;
 }
@@ -45,6 +46,10 @@ sub contextualize_message {
                 $ctxt{$F{extract_details}->[$i]} = $data[$i];
             }
         }
+    }
+    elsif( index($str, 'Invalid') >= 0 ) {
+        $ctxt{status} = 'invalid';
+        @ctxt{qw(acct src_ip)} = ($str =~ /Invalid user (\S+) from (\S+)/);
     }
     else {
         delete $ctxt{status};
