@@ -60,8 +60,9 @@ sub contextualize_message {
     elsif( my @details = ($str =~ /^([A-F0-9]{8,16}): (.*)$/) ) {
         $ctxt{rec_id} = $details[0];
         foreach my $kv ( split /, /, $details[1] ) {
-            my ($k,$v) = ($kv =~ /(\w+)=<?([^>]+)>?/);
-            $ctxt{$MAP{$k}} = $v if exists $MAP{$k};
+            if( my ($k,$v) = ($kv =~ /(\w+)=<?([^>]+)>?/) ) {
+                $ctxt{$MAP{$k}} = $v if exists $MAP{$k};
+            }
         }
     }
     else {
