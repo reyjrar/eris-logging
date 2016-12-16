@@ -30,15 +30,15 @@ if( $opt->help ) {
 }
 
 my $main_session = POE::Session->create(
-        inline_states => {
-            _start => \&main_start,
-            _stop  => \&main_stop,
-            stats  => \&main_stats,
-            worker_stdout => \&worker_stdout,
-        },
-        heap => {
-            stats => {},
-        },
+    inline_states => {
+        _start => \&main_start,
+        _stop  => \&main_stop,
+        stats  => \&main_stats,
+        worker_stdout => \&worker_stdout,
+    },
+    heap => {
+        stats => {},
+    },
 );
 
 POE::Kernel->run();

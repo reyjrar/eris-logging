@@ -93,6 +93,8 @@ sub main_start {
         ErrorEvent   => 'syslog_error',
     );
 
+    # Run things at intervals
+    $kernel->delay( es_bulk => $opt->flush_interval );
     $kernel->delay( stats => $opt->stats_interval );
 
     # Handle the Mapping bits?
@@ -141,8 +143,6 @@ sub syslog_input {
     push @{ $heap->{bulk_queue} },
         { index => { _index => $index, _type => $type } },
         $doc;
-
-    $kernel->delay( es_bulk => $opt->flush_interval ) unless exists $heap->{_bulk_started};
 }
 
 sub syslog_error {
@@ -174,6 +174,7 @@ sub es_check_mapping_resp {
 
     if( exists $mappings->{$name} ) {
         $heap->{es_ready} = 1;
+        print STDERR "[mapping_exists] Worker ready to index data\n";
     }
     else {
         printf STDERR "Mapping missing, going to attempt creation.\n";
@@ -275,6 +276,7 @@ sub es_mapping_resp {
     my $resp = $resps->[0];
 
     if( $resp->is_success ) {
+        print STDERR "[mapping_set] Worker ready to index data\n";
         $heap->{es_ready} = 1;
     }
     else {
@@ -300,13 +302,11 @@ sub es_bulk {
             $heap->{stats}{discarded} ||= 0;
             $heap->{stats}{discarded} += scalar( @{$bulk} ) / 2;
         }
-        $kernel->delay( es_bulk => $opt->flush_interval );
     }
-    else {
-        delete $heap->{_bulk_started};
-    }
-
     $heap->{bulk_queue} = [];
+
+    # Reschedule the flush
+    $kernel->delay( es_bulk => $opt->flush_interval );
 }
 
 sub es_bulk_resp {
