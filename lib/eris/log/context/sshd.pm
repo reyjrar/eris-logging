@@ -41,6 +41,7 @@ sub contextualize_message {
                   : index($str,'Failed')   >= 0 ? 'failure'
                   : undef;
     if( defined $ctxt{status} ) {
+        $log->add_tags(qw(authentication));
         if( my @data = ($str =~ /$RE{extract_details}/o) ) {
             for(my $i=0; $i < @data; $i++) {
                 $ctxt{$F{extract_details}->[$i]} = $data[$i];

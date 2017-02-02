@@ -2,7 +2,8 @@ package eris::log;
 
 use Hash::Merge::Simple qw(clone_merge);
 use Moo;
-use Types::Standard qw(ArrayRef HashRef Str);
+use Types::Common::Numeric qw(PositiveNum);
+use Types::Standard qw(ArrayRef HashRef Maybe Str);
 use Ref::Util qw(is_hashref);
 
 use eris::dictionary;
@@ -43,6 +44,10 @@ has tags => (
     isa     => ArrayRef,
     lazy    => 1,
     default => sub { [] },
+);
+has total_time => (
+    is  => 'rw',
+    isa => Maybe[PositiveNum],
 );
 
 my $dict;
@@ -97,8 +102,23 @@ sub set_decoded {
     }
 }
 
+sub add_tags {
+    my ($self,@tags) = @_;
+    my %tags = map { $_ => 1 } @{ $self->tags };
+
+    foreach my $t (@tags) {
+        push @{ $self->tags }, $t unless exists $tags{$t};
+        $tags{$t} = 1;
+    }
+
+    return $self;
+}
+
 sub add_timing {
     my ($self,%args) = @_;
+    if( exists $args{total} ) {
+        $self->total_time( delete $args{total} );
+    }
     my $t = $self->timing;
     push @{ $t },
         map { +{ phase => $_, seconds => $args{$_} } }
@@ -112,7 +132,7 @@ sub as_doc {
     my $doc = $self->context;
     $doc->{timing} = $self->timing;
     $doc->{tags}   = $self->tags;
-
+    $doc->{total_time} = $self->total_time if $self->total_time;
     return $doc;
 }
 1;

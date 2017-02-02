@@ -29,8 +29,9 @@ sub contextualize_message {
     my ($self,$log) = @_;
     my $str = $log->context->{message};
 
-    my %ctxt = ();
+    $log->add_tags(qw(security ids));
 
+    my %ctxt = ();
     if ( $str =~ s/^\[(\S+)\]\s+// ) {
         $ctxt{id} = (split /:/, $1, 3)[1];
         if ( $str =~ /([^\[]+)/ ) {

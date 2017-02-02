@@ -46,6 +46,7 @@ sub contextualize_message {
     my ($self,$log) = @_;
     my $str = $log->context->{message};
 
+    $log->add_tags(qw(mail));
     my %ctxt = ();
 
     my @path = split /\//, $log->context->{program};
