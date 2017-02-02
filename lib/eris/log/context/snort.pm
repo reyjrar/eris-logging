@@ -35,8 +35,8 @@ sub contextualize_message {
     if ( $str =~ s/^\[(\S+)\]\s+// ) {
         $ctxt{id} = (split /:/, $1, 3)[1];
         if ( $str =~ /([^\[]+)/ ) {
-            $ctxt{desc} = $1;
-            $ctxt{desc} =~ s/\s+$//;
+            $ctxt{name} = $1;
+            $ctxt{name} =~ s/\s+$//;
             if ( $str =~ /\[Classification: ([^\]]+)\]/ )  {
                 $ctxt{class} = $1;
             }

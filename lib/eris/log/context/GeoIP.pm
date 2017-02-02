@@ -13,7 +13,7 @@ with qw(
 has 'geo_db' => (
     is      => 'ro',
     isa     => Str,
-    default => '/tmp/GeoLite2-City.mmdb',
+    default => '/usr/share/GeoIP/GeoLite2-City.mmdb',
 );
 has 'geo_lookup' => (
     is      => 'ro',
