@@ -63,13 +63,14 @@ my $main_session = POE::Session->create(
             es_mapping_resp       => \&es_mapping_resp,
         },
         heap => {
-            es_addr         => 'http://localhost:9200',
-            es_mapping_name => 'syslog',
-            es_default_type => 'syslog',
-            es_ready        => 0,
-            stats           => {},
-            bulk_queue      => [],
-            batch_size      => {},
+            es_addr          => 'http://localhost:9200',
+            es_mapping_name  => 'syslog',
+            es_default_type  => 'syslog',
+            es_default_index => 'syslog',
+            es_ready         => 0,
+            stats            => {},
+            bulk_queue       => [],
+            batch_size       => {},
         },
 );
 
@@ -134,14 +135,17 @@ sub syslog_input {
     my $time = exists $doc->{epoch} ? delete $doc->{epoch} : time;
     $doc->{timestamp} = strftime('%FT%T%z',gmtime($time));
 
-    my $index = sprintf('%s-%s', $heap->{es_mapping_name}, strftime('%Y.%m.%d', gmtime($time)));
-    my $type  = exists $doc->{type} ? delete $doc->{type} : $heap->{es_default_type};
+    my %meta = ();
+    foreach my $m (qw(_index _type)) {
+        $meta{$m} = exists $doc->{$m} ? delete $doc->{$m} : $heap->{"es_default$m"};
+    }
+    $meta{_index} = sprintf('%s-%s', $meta{_index}, strftime('%Y.%m.%d', gmtime($time)));
 
     $heap->{stats}{queued} ||= 0;
     $heap->{stats}{queued}++;
 
     push @{ $heap->{bulk_queue} },
-        { index => { _index => $index, _type => $type } },
+        { index => \%meta },
         $doc;
 }
 

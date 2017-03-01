@@ -49,6 +49,14 @@ has total_time => (
     is  => 'rw',
     isa => Maybe[PositiveNum],
 );
+has index => (
+    is => 'rw',
+    isa => Maybe[Str],
+);
+has type => (
+    is => 'rw',
+    isa => Maybe[Str],
+);
 
 my $dict;
 
@@ -62,7 +70,7 @@ sub set_decoded {
     foreach my $k (keys %{ $href }) {
         $d->{$k} = $href->{$k};
     }
-    $self->add_context( "decoder::" . $name, $href);
+    $self->add_context($name, $href);
 }
 
 {
@@ -129,10 +137,20 @@ sub add_timing {
 sub as_doc {
     my ($self,%args) = @_;
 
-    my $doc = $self->context;
+    # Default to just the context;
+    my $doc = $args{complete} ? $self->complete : $self->context;
+
+    # Add Metadata
+    if( my $idx = $self->index ) {
+        $doc->{_index} = $idx;
+    }
+    if( my $type = $self->type ) {
+        $doc->{_type} = $type;
+    }
     $doc->{timing} = $self->timing;
     $doc->{tags}   = $self->tags;
     $doc->{total_time} = $self->total_time if $self->total_time;
+
     return $doc;
 }
 1;
