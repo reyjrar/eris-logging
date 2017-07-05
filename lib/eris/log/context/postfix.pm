@@ -68,7 +68,7 @@ sub contextualize_message {
     }
     else {
         # Last ditch effort to grab information
-        if( my @conn = ($str =~ / (from|to) ([^\[]+)\[([^\]]+)\]/) ) {
+        if( my @conn = ($str =~ /(?>\b(from|to) ([^\[]+)\[([^\]]+)\])/) ) {
             my @fields = shift @conn eq 'from' ? qw(src src_ip) : qw(dst dst_ip);
             @ctxt{@fields} = @conn;
         }

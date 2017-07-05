@@ -1,6 +1,5 @@
 package eris::log::context::snort;
 
-use Const::Fast;
 use Moo;
 use namespace::autoclean;
 
@@ -32,18 +31,21 @@ sub contextualize_message {
     $log->add_tags(qw(security ids));
 
     my %ctxt = ();
-    if ( $str =~ s/^\[(\S+)\]\s+// ) {
+    if ( $str =~ /^\[(\S+)\]\s+/g ) {
         $ctxt{id} = (split /:/, $1, 3)[1];
-        if ( $str =~ /([^\[]+)/ ) {
+        if ( $str =~ /\G([^\[]+)/gc ) {
             $ctxt{name} = $1;
             $ctxt{name} =~ s/\s+$//;
-            if ( $str =~ /\[Classification: ([^\]]+)\]/ )  {
+            if ( $str =~ /(?>\[Classification: ([^\]]+)\])/ )  {
                 $ctxt{class} = $1;
             }
-            if ( $str =~ /\{(\S+)\}/ ) {
+            if ( $str =~ /(?>\[Priority: (\d+)\])/ )  {
+                $ctxt{pri} = $1;
+            }
+            if ( $str =~ /(?>\{(\S+)\})/ ) {
                 $ctxt{proto_app} = $1;
             }
-            if( $str =~ /(\S+):(\d+) -> (\S+):(\d+)/ ) {
+            if( $str =~ /(?>(\S+):(\d+) -> (\S+):(\d+))/ ) {
                 @ctxt{qw(src_ip src_port dst_ip dst_port)} = ($1,$2,$3,$4);
             }
         }

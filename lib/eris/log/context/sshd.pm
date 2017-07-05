@@ -37,18 +37,16 @@ sub contextualize_message {
     my $str = $log->context->{message};
 
     my %ctxt = ();
-    $ctxt{status} = index($str,'Accepted') >= 0 ? 'success'
-                  : index($str,'Failed')   >= 0 ? 'failure'
+    $ctxt{status} = $str =~ /Accepted/ ? 'success'
+                  : $str =~ /Failed/   ? 'failure'
                   : undef;
     if( defined $ctxt{status} ) {
-        $log->add_tags(qw(authentication));
-        if( my @data = ($str =~ /$RE{extract_details}/o) ) {
-            for(my $i=0; $i < @data; $i++) {
-                $ctxt{$F{extract_details}->[$i]} = $data[$i];
-            }
+        $ctxt{action} = 'authentication';
+        if( my @data = ($str =~ /(?>$RE{extract_details})/o) ) {
+            @ctxt{@{ $F{extract_details} }} = @data;
         }
     }
-    elsif( index($str, 'Invalid') >= 0 ) {
+    elsif( $str =~ /Invalid/ ) {
         $ctxt{status} = 'invalid';
         @ctxt{qw(acct src_ip)} = ($str =~ /Invalid user (\S+) from (\S+)/);
     }

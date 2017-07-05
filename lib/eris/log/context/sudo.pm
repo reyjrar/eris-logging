@@ -28,7 +28,7 @@ sub contextualize_message {
 
     my %ctxt = ();
 
-    my ($user,$variables) = split ' : ', $str;
+    my ($user,$variables) = split ' : ', $str, 2;
     if( defined $variables ) {
         chomp($variables);
         foreach my $pair (split ' ; ', $variables) {
