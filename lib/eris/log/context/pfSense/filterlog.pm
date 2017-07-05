@@ -42,7 +42,7 @@ sub contextualize_message {
     %fields = (
         base => [qw( rule_id subrule_id anchor rec_id dev proc action direction ipver )],
         ipv4 => [qw( TOS ECN TTL id offset flags proto_id proto )],
-        ipv6 => [qw( class label TTL proto proto_id )],
+        ipv6 => [qw( class label TTL proto_app proto_id )],
         ip   => [qw(length src_ip dst_ip)],
         tcp_or_udp => [qw(src_port dst_port proto_bytes)],
     ) unless keys %fields;
@@ -51,17 +51,20 @@ sub contextualize_message {
         $self->csv_parse($str);
     };
 
-    my %ctxt;
     my @fields = $self->csv_fields;
     if( @fields > @{ $fields{base} } ) {
+        my %ctxt = ( service => 'firewall' );
         $log->add_tags('pfSense');
         @ctxt{@{ $fields{base} }} = splice @fields, 0, scalar(@{ $fields{base} });
         my $ipv = sprintf "ipv%d", $ctxt{ipver} || 0;
         if ( exists $fields{$ipv} ) {
             @ctxt{@{ $fields{$ipv} }} = splice @fields, 0, scalar(@{ $fields{$ipv} });
             @ctxt{ @{ $fields{ip} } } = splice @fields, 0, scalar(@{ $fields{ip} });
-            if( exists $ctxt{proto} && ( $ctxt{proto} eq 'UDP' || $ctxt{proto} eq 'TCP' ) ) {
-                @ctxt{ @{ $fields{tcp_or_udp} } } = splice @fields, 0, scalar(@{ $fields{tcp_or_udp} });
+            if( $ctxt{proto_app} ) {
+                $ctxt{proto_app} = lc $ctxt{proto_app};
+                if( ( $ctxt{proto_app} eq 'udp' || $ctxt{proto_app} eq 'tcp' ) ) {
+                    @ctxt{ @{ $fields{tcp_or_udp} } } = splice @fields, 0, scalar(@{ $fields{tcp_or_udp} });
+                }
             }
             if( $ctxt{direction} and $ctxt{length} ) {
                 $ctxt{"$ctxt{direction}_bytes"} = $ctxt{length};
