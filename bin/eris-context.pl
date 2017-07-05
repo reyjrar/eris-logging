@@ -38,7 +38,7 @@ my $ctxr = eris::log::contextualizer->new( $opt->config ? (config => $opt->confi
 my @sampled = ();
 foreach my $c ( @{ $ctxr->contexts->plugins } ) {
     verbose({color=>'magenta'}, sprintf "Loaded context: %s", $c->name);
-    if( $opt->sample and lc $opt->sample eq $c->name ) {
+    if( $opt->sample and lc $opt->sample eq lc $c->name ) {
         push @sampled, $c->sample_messages;
     }
 }
