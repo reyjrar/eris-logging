@@ -54,7 +54,7 @@ sub contextualize_message {
     my @fields = $self->csv_fields;
     if( @fields > @{ $fields{base} } ) {
         my %ctxt = ( service => 'firewall' );
-        $log->add_tags('pfSense');
+        $log->add_tags(qw(security pfSense firewall));
         @ctxt{@{ $fields{base} }} = splice @fields, 0, scalar(@{ $fields{base} });
         my $ipv = sprintf "ipv%d", $ctxt{ipver} || 0;
         if ( exists $fields{$ipv} ) {

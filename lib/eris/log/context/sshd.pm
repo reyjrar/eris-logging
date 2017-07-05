@@ -54,7 +54,7 @@ sub contextualize_message {
         delete $ctxt{status};
     }
 
-    $log->add_context($self->name,\%ctxt);
+    $log->add_context($self->name,\%ctxt) if keys %ctxt;
 }
 
 1;

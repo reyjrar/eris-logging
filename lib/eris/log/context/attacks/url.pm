@@ -97,7 +97,10 @@ sub contextualize_message {
         $add{$f} = \%attack if keys %attack;
     }
 
-    $log->add_context($self->name,{ attacks => \%add }) if keys %add;
+    if( keys %add ) {
+        $log->add_context($self->name,{ attacks => \%add });
+        $log->add_tags(qw(security));
+    }
 }
 
 1;

@@ -44,7 +44,7 @@ sub contextualize_message {
     }
     $ctxt{src_user} = $user if $user;
 
-    $log->add_context($self->name,\%ctxt);
+    $log->add_context($self->name,\%ctxt) if keys %ctxt;
 }
 
 1;

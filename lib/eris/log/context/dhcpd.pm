@@ -26,7 +26,10 @@ sub contextualize_message {
                 || /(?>(?<action>DHCPDISCOVER) from (?<src_mac>\S+) (?:\((?<src>[^)]+)\) )?via (?<dev>\S+))/n
                 || /(?>(?<action>DHCPOFFER) on (?<src_ip>\S+) to (?<src_mac>\S+) (?:\((?<src>[^)]+)\) )?via (?<dev>\S+))/n
                 || 0;
-    $log->add_context($self->name,{%+}) if $matched;
+    if( $matched ) {
+        $log->add_context($self->name,{%+});
+        $log->add_tags(qw(inventory));
+    }
 }
 
 1;
