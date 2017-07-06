@@ -24,7 +24,6 @@ sub contextualize_message {
     my $str = $log->context->{message};
 
     my %ctxt = ();
-
     if( $str =~ / CMD / ) {
         my @parts = map { s/^\(//; s/\)$//; $_ } split / CMD /, $str;
         $ctxt{src_user} = $parts[0];
@@ -33,7 +32,7 @@ sub contextualize_message {
         $ctxt{action} = 'exec';
     }
 
-    $log->add_context($self->name,\%ctxt);
+    $log->add_context($self->name,\%ctxt) if keys %ctxt;
 }
 
 1;

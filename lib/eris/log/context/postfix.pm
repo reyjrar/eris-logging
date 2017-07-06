@@ -74,7 +74,7 @@ sub contextualize_message {
         }
     }
 
-    $log->add_context($self->name,\%ctxt);
+    $log->add_context($self->name,\%ctxt) if keys %ctxt;
 }
 
 1;

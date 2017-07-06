@@ -3,7 +3,6 @@ package eris::log::decoder::syslog;
 use Const::Fast;
 use Moo;
 use Parse::Syslog::Line;
-
 use namespace::autoclean;
 
 with qw(
@@ -30,7 +29,8 @@ const my %MAP => (
     host         => 'hostname',
     priority     => 'severity',
     program_name => 'program',
-    program_pid  => 'pid',
+    program_pid  => 'proc_id',
+    program_sub  => 'proc',
     content      => 'message',
 );
 
