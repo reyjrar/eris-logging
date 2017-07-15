@@ -21,10 +21,10 @@ sub contextualize_message {
     my ($self,$log) = @_;
 
     local $_ = $log->context->{message};
-    my $matched =  /(?>(?<action>DHCPACK) on (?<src_ip>\S+) to (?<src_mac>\S+) (?:\((?<src>[^)]+)\) )?via (?<dev>\S+))/n
-                || /(?>(?<action>DHCPREQUEST) for (?<src_ip>\S+) (?:\([^)]+\) )?from (?<src_mac>\S+) (?:\((?<src>[^)]+)\) )?via (?<dev>\S+))/n
-                || /(?>(?<action>DHCPDISCOVER) from (?<src_mac>\S+) (?:\((?<src>[^)]+)\) )?via (?<dev>\S+))/n
-                || /(?>(?<action>DHCPOFFER) on (?<src_ip>\S+) to (?<src_mac>\S+) (?:\((?<src>[^)]+)\) )?via (?<dev>\S+))/n
+    my $matched =  /(?>(?<action>DHCPACK) on (?<src_ip>\S+) to (?<src_mac>\S+) (?:\((?<src>[^)]+)\) )?via (?<dev>\S+))/
+                || /(?>(?<action>DHCPREQUEST) for (?<src_ip>\S+) (?:\([^)]+\) )?from (?<src_mac>\S+) (?:\((?<src>[^)]+)\) )?via (?<dev>\S+))/
+                || /(?>(?<action>DHCPDISCOVER) from (?<src_mac>\S+) (?:\((?<src>[^)]+)\) )?via (?<dev>\S+))/
+                || /(?>(?<action>DHCPOFFER) on (?<src_ip>\S+) to (?<src_mac>\S+) (?:\((?<src>[^)]+)\) )?via (?<dev>\S+))/
                 || 0;
     if( $matched ) {
         $log->add_context($self->name,{%+});

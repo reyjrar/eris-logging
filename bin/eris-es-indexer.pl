@@ -17,16 +17,17 @@ use POE qw(
     Filter::Reference
 );
 use POSIX qw(strftime);
-
+use YAML qw();
 
 use lib "$FindBin::RealBin/../lib";
 use eris::log::contextualizer;
 
 # Options
 my ($opt,$usage) = describe_options('%c - %o',
-    [ 'config:s', 'Config file, required.', { validate => { "Must be a readable file" => sub { -r $_[0] } } } ],
+    [ 'config:s', 'Config file, required.', { callbacks => { "Must be a readable file" => sub { -r $_[0] } } } ],
     [ 'stats-interval:i',   'Interval in seconds to send statistics, default: 60', { default => 60 }],
     [ 'flush-interval|F:i', 'Interval in seconds to flush the bulk queue, default: 15', { default => 15 } ],
+    [ 'es-version|esv:i',   'ElasticSearch Major Version to use for Mappings, default: 5', { default => 5 } ],
     [],
     [ 'help',  'Display this help' ],
 );
@@ -35,9 +36,30 @@ if( $opt->help ) {
     exit 0;
 }
 
-# Global
+# Load the Configuration
+my $config = {};
+if( $opt->config ) {
+    eval {
+        $config = YAML::LoadFile( $opt->config );
+        1;
+    } or do {
+        my $err = $@;
+        die sprintf "Failed loading your requested config %s: %s",
+            $opt->config, $@;
+    };
+}
+my %CONFIG = (
+    # Defaults
+    es_addr          => 'http://localhost:9200',
+    es_mapping_name  => 'syslog',
+    es_default_type  => 'syslog',
+    es_default_index => 'syslog',
+    # Overrides
+    %{ $config },
+);
+# Instantiate our object
 my $eris = eris::log::contextualizer->new(
-    $opt->config ? ( config => $opt->config ) : (),
+    config => $config,
 );
 
 # POE Sessions
@@ -63,10 +85,7 @@ my $main_session = POE::Session->create(
             es_mapping_resp       => \&es_mapping_resp,
         },
         heap => {
-            es_addr          => 'http://localhost:9200',
-            es_mapping_name  => 'syslog',
-            es_default_type  => 'syslog',
-            es_default_index => 'syslog',
+            %CONFIG,
             es_ready         => 0,
             stats            => {},
             bulk_queue       => [],
@@ -80,6 +99,8 @@ sub main_stop {  }
 
 sub main_start {
     my ($kernel,$heap) = @_[KERNEL,HEAP];
+
+    print YAML::Dump( $heap );
 
     # Set our alias
     $kernel->alias_set('main');
@@ -189,85 +210,156 @@ sub es_check_mapping_resp {
 sub es_mapping {
     my ($kernel,$heap) = @_[KERNEL,HEAP];
     my %mapping = (
-        template => "$heap->{es_mapping_name}-*",
-        settings => {
-            'index.query.default_field' => 'message',
-            'index.mapping.ignore_malformed' => 'yes',
-        },
-        mappings => {
-            _default_ => {
-                _all => { enabled => 'false' },
-                dynamic_templates => [
-                    { geoip_template => {
-                        match   => '*_geoip',
-                        mapping => {
-                            type  => 'object',
-                            enable => 'true',
-                            dynamic => 'false',
-                            properties => {
-                                city        => { type => 'string', index => 'not_analyzed' },
-                                country     => { type => 'string', index => 'not_analyzed' },
-                                continent   => { type => 'string', index => 'not_analyzed' },
-                                postal_code => { type => 'string', index => 'not_analyzed' },
-                                location    => { type => 'geopoint', lat_lon => 'true' },
-                            }
-                        },
-                    }},
-                    { ip_template => {
-                        match   => '*_ip',
-                        mapping => {
-                            type             => 'ip',
-                            ignore_malformed => 'true',
-                            index            => 'analyzed',
-                            doc_values       => 'true',
-                        },
-                        fields => {
-                            raw => {
-                                mapping => {
-                                    type => 'string',
-                                    index => 'not_analyzed',
+        2 => {
+            template => "$heap->{es_mapping_name}-*",
+            settings => {
+                'index.query.default_field' => 'message',
+                'index.mapping.ignore_malformed' => 'yes',
+            },
+            mappings => {
+                _default_ => {
+                    _all => { enabled => 'false' },
+                    dynamic_templates => [
+                        { geoip_template => {
+                            match   => '*_geoip',
+                            mapping => {
+                                type  => 'object',
+                                enable => 'true',
+                                dynamic => 'false',
+                                properties => {
+                                    city        => { type => 'string', index => 'not_analyzed' },
+                                    country     => { type => 'string', index => 'not_analyzed' },
+                                    continent   => { type => 'string', index => 'not_analyzed' },
+                                    postal_code => { type => 'string', index => 'not_analyzed' },
+                                    location    => { type => 'geopoint', lat_lon => 'true' },
+                                }
+                            },
+                        }},
+                        { ip_template => {
+                            match   => '*_ip',
+                            mapping => {
+                                type             => 'ip',
+                                ignore_malformed => 'true',
+                                index            => 'analyzed',
+                                doc_values       => 'true',
+                            },
+                            fields => {
+                                raw => {
+                                    mapping => {
+                                        type => 'string',
+                                        index => 'not_analyzed',
+                                    }
                                 }
                             }
-                        }
-                    }},
-                    { string_template => {
-                        match_mapping_type => 'string',
-                        mapping => {
-                            type         => 'string',
-                            index        => 'not_analyzed',
-                            ignore_above => 256,
-                        }
-                    }},
-                ],
-                properties => {
-                    timing => {
-                        type => 'nested',
-                        dynamic => 'false',
-                        properties => {
-                            phase => { type => 'string', index => 'not_analyzed', ignore_above => 80 },
-                            seconds => { type => 'float' },
-                        }
-                    },
-                    'timestamp' => {
-                        type       => 'date',
-                        format     => 'dateTime',
-                        index      => 'not_analyzed',
-                        doc_values => 'true',
-                    },
-                    message => {
-                        type => 'string',
-                        index => 'analyzed',
-                        ignore_above => 4096,
-                        analyzer => 'whitespace',
-                    },
+                        }},
+                        { string_template => {
+                            match_mapping_type => 'string',
+                            mapping => {
+                                type         => 'string',
+                                index        => 'not_analyzed',
+                                ignore_above => 256,
+                            }
+                        }},
+                    ],
+                    properties => {
+                        timing => {
+                            type => 'nested',
+                            dynamic => 'false',
+                            properties => {
+                                phase => { type => 'string', index => 'not_analyzed', ignore_above => 80 },
+                                seconds => { type => 'float' },
+                            }
+                        },
+                        'timestamp' => {
+                            type       => 'date',
+                            format     => 'dateTime',
+                            index      => 'not_analyzed',
+                            doc_values => 'true',
+                        },
+                        message => {
+                            type => 'string',
+                            index => 'analyzed',
+                            ignore_above => 4096,
+                            analyzer => 'whitespace',
+                        },
+                    }
                 }
             }
-        }
+        },
+        5 => {
+            template => "$heap->{es_mapping_name}-*",
+            settings => {
+                'index.query.default_field' => 'message',
+                'index.mapping.ignore_malformed' => 'yes',
+            },
+            mappings => {
+                _default_ => {
+                    _all => { enabled => 'false' },
+                    dynamic_templates => [
+                        { geoip_template => {
+                            match   => '*_geoip',
+                            mapping => {
+                                type  => 'object',
+                                enable => 'true',
+                                dynamic => 'false',
+                                properties => {
+                                    city        => { type => 'keyword' },
+                                    country     => { type => 'keyword' },
+                                    continent   => { type => 'keyword' },
+                                    postal_code => { type => 'keyword' },
+                                    location    => { type => 'geopoint', lat_lon => 'true' },
+                                }
+                            },
+                        }},
+                        { ip_template => {
+                            match   => '*_ip',
+                            mapping => {
+                                type             => 'ip',
+                                ignore_malformed => 'true',
+                                index            => 'analyzed',
+                                doc_values       => 'true',
+                                fields => {
+                                    raw => {
+                                        type => 'keyword',
+                                    },
+                                },
+                            },
+                        }},
+                        { string_template => {
+                            match_mapping_type => 'string',
+                            mapping => {
+                                type         => 'keyword',
+                                ignore_above => 256,
+                            }
+                        }},
+                    ],
+                    properties => {
+                        timing => {
+                            type => 'nested',
+                            dynamic => 'false',
+                            properties => {
+                                phase => { type => 'keyword', ignore_above => 80 },
+                                seconds => { type => 'float' },
+                            }
+                        },
+                        'timestamp' => {
+                            type       => 'date',
+                            format     => 'date_time||date_time_no_millis||epoch_second',
+                            index      => 'not_analyzed',
+                        },
+                        message => {
+                            type => 'text',
+                            analyzer => 'whitespace',
+                        },
+                    }
+                }
+            }
+        },
     );
 
     # Build the Request
     my $req = App::ElasticSearch::Utilities::HTTPRequest->new(PUT => sprintf("%s/_template/%s_mapping",$heap->{es_addr},$heap->{es_mapping_name}));
-    $req->content(\%mapping);
+    $req->content($mapping{$opt->es_version});
 
     # Submmit it
     $kernel->post( ua => request => es_mapping_resp => $req );

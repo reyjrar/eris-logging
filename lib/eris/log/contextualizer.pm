@@ -16,7 +16,6 @@ use namespace::autoclean;
 has config => (
     is       => 'ro',
     isa      => HashRef,
-    coerce   => HashRefFromYAML,
     default  => sub { +{} },
 );
 has contexts => (
