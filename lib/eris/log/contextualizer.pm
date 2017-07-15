@@ -87,5 +87,4 @@ sub parse {
     return $log;
 }
 
-
 1;

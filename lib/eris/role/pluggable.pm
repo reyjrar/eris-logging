@@ -47,15 +47,28 @@ has 'plugins_config' => (
 sub _build_loader {
     my ($self) = @_;
     my $loader = Module::Pluggable::Object->new(
-            search_path => [ $self->namespace, @{$self->search_path} ],
-            except      => $self->disabled,
-            instantiate => 'new',
+        search_path => [ $self->namespace, @{$self->search_path} ],
+        except      => $self->disabled,
+        require     => 1,
     );
     return $loader;
 }
 
 sub _build_plugins {
     my $self = shift;
-    return [ sort { $a->priority <=> $b->priority || $a->name cmp $b->name } $self->loader->plugins( %{ $self->plugins_config } ) ];
+    my @plugins = ();
+    foreach my $class ( $self->loader->plugins ) {
+        eval {
+            push @plugins, $class->new(%{ $self->plugins_config });
+            1;
+        } or do {
+            my $err = $@;
+            no strict 'refs';
+            my $warn_var = sprintf '%s::SuppressWarnings', $class;
+            my $suppress_warnings = eval "$$warn_var" || 0;
+            warn $err unless $suppress_warnings;
+        };
+    }
+    return [ sort { $a->priority <=> $b->priority || $a->name cmp $b->name } @plugins ];
 }
 1;

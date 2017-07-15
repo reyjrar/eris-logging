@@ -28,52 +28,56 @@ sub contextualize {
     foreach my $ctxt ( @{ $self->plugins } ) {
         my $field   = $ctxt->field;
         my $matcher = $ctxt->matcher;
-        my $matched;
-        # log context maybe updated
-        my %c  = %{ $log->context };
 
-        if( $field eq '_exists_' ) {
-            # match against the key space
-            if( !is_ref($matcher) ) {
-                # simplest case string
-                $matched = exists $c{$matcher};
+        # Initialize to the catchall condition
+        my $matched = $field eq '*' && $matcher eq '*';
+
+        if( !$matched ) {
+            # log context maybe updated
+            my %c  = %{ $log->context };
+
+            if( $field eq '_exists_' ) {
+                # match against the key space
+                if( !is_ref($matcher) ) {
+                    # simplest case string
+                    $matched = exists $c{$matcher};
+                }
+                elsif( is_regexpref($matcher) ) {
+                    # regexp match
+                    $matched = any { /$matcher/ } keys %c;
+                }
+                elsif( is_arrayref($matcher) ) {
+                    # list match
+                    $matched = any { exists $c{$_} } @{ $matcher };
+                }
             }
-            elsif( is_regexpref($matcher) ) {
-                # regexp match
-                $matched = any { /$matcher/ } keys %c;
-            }
-            elsif( is_arrayref($matcher) ) {
-                # list match
-                $matched = any { exists $c{$_} } @{ $matcher };
+            elsif( exists $c{$field} ) {
+                if( !is_ref($matcher) ) {
+                    # Simplest case, we're a string
+                    $matched = lc $c{$field} eq lc $matcher;
+                }
+                elsif( is_regexpref($matcher) ) {
+                    # regexp match
+                    $matched = $c{$field} =~ /$matcher/;
+                }
+                elsif( is_arrayref($matcher) ) {
+                    # list match
+                    $matched = any { lc $c{$field} eq lc $_ } @{ $matcher };
+                }
+                elsif( is_coderef($matcher) ) {
+                    # call the code ref
+                    eval {
+                        $matched = $matcher->( $c{$field} );
+                        1;
+                    } or do {
+                        # Catch an exception in the matcher
+                        my $err = $@;
+                        warn sprintf "[%s] matcher coderef died: %s",
+                            $ctxt->name, $err;
+                    };
+                }
             }
         }
-        elsif( exists $c{$field} ) {
-            if( !is_ref($matcher) ) {
-                # Simplest case, we're a string
-                $matched = lc $c{$field} eq lc $matcher;
-            }
-            elsif( is_regexpref($matcher) ) {
-                # regexp match
-                $matched = $c{$field} =~ /$matcher/;
-            }
-            elsif( is_arrayref($matcher) ) {
-                # list match
-                $matched = any { lc $c{$field} eq lc $_ } @{ $matcher };
-            }
-            elsif( is_coderef($matcher) ) {
-                # call the code ref
-                eval {
-                    $matched = $matcher->( $c{$field} );
-                    1;
-                } or do {
-                    # Catch an exception in the matcher
-                    my $err = $@;
-                    warn sprintf "[%s] matcher coderef died: %s",
-                        $ctxt->name, $err;
-                };
-            }
-        }
-
         if( $matched ) {
             my $t0 = [gettimeofday];
             $ctxt->contextualize_message($log);
