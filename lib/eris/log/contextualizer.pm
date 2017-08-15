@@ -69,6 +69,7 @@ sub parse {
     my %t=();
     my $t0 = [gettimeofday];
     my $log = $self->decode($raw);
+    $log->add_context( raw => { raw => $raw } );
     my $tdiff = tv_interval($t0);
     $t{decoders} = $tdiff;
 

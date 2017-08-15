@@ -41,7 +41,7 @@ sub contextualize_message {
 
     %fields = (
         base => [qw( rule_id subrule_id anchor rec_id dev proc action direction ipver )],
-        ipv4 => [qw( TOS ECN TTL id offset flags proto_id proto )],
+        ipv4 => [qw( TOS ECN TTL id offset flags proto_id proto_app )],
         ipv6 => [qw( class label TTL proto_app proto_id )],
         ip   => [qw(length src_ip dst_ip)],
         tcp_or_udp => [qw(src_port dst_port proto_bytes)],

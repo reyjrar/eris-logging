@@ -282,6 +282,10 @@ sub es_mapping {
                             ignore_above => 4096,
                             analyzer => 'whitespace',
                         },
+                        raw => {
+                            type => 'string',
+                            index => 'false',
+                        }
                     }
                 }
             }
@@ -350,6 +354,11 @@ sub es_mapping {
                         message => {
                             type => 'text',
                             analyzer => 'whitespace',
+                        },
+                        raw => {
+                            type  => 'text',
+                            index => 'false',
+                            norms => 'false',
                         },
                     }
                 }
