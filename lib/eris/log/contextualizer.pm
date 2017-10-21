@@ -33,12 +33,6 @@ has 'decoders' => (
     builder => '_build_decoders',
     handles => [qw(decode)],
 );
-has 'dictionary' => (
-    is      => 'ro',
-    isa     => InstanceOf['eris::dictionary'],
-    lazy    => 1,
-    builder => '_build_dictionary',
-);
 
 ########################################################################
 # Builders
@@ -54,12 +48,7 @@ sub _build_contexts {
         %{ $self->config->{context} || {} },
     );
 }
-sub _build_dictionary {
-    my $self = shift;
-    return eris::dictionary->instance(
-        %{ $self->config->{dictionary} || {} },
-    );
-}
+
 ########################################################################
 # Methods
 sub parse {
@@ -72,7 +61,6 @@ sub parse {
     $log->add_context( raw => { raw => $raw } );
     my $tdiff = tv_interval($t0);
     $t{decoders} = $tdiff;
-
 
     # Add context
     my $t1 = [gettimeofday];

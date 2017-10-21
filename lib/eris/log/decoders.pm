@@ -36,11 +36,11 @@ sub _build_namespace { 'eris::log::decoder' }
         foreach my $decoder (@{ $decoders }) {
             my $t0 = [gettimeofday];
             my $data = $decoder->decode_message($raw);
-            my $decoder_name = $decoder->name;
+            my $decoder_name = "decoder::" . $decoder->name;
             if( defined $data && ref $data eq 'HASH' ) {
-                $log->set_decoded($decoder_name => $data);
+                $log->add_context($decoder_name => $data);
             }
-            $t{"decoder::$decoder_name"} = tv_interval($t0);
+            $t{$decoder_name} = tv_interval($t0);
         }
         $log->add_timing(%t);
 
