@@ -11,6 +11,7 @@ has name => (
     lazy    => 1,
     builder => '_build_name',
 );
+
 has 'priority' => (
     is      => 'ro',
     isa     => Int,

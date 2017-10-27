@@ -3,7 +3,7 @@ package eris::log;
 use Hash::Merge::Simple qw(clone_merge);
 use Moo;
 use Types::Common::Numeric qw(PositiveNum);
-use Types::Standard qw(ArrayRef ConsumerOf HashRef Maybe Str);
+use Types::Standard qw(ArrayRef HashRef Maybe Num Str);
 use Ref::Util qw(is_hashref);
 
 use namespace::autoclean;
@@ -47,17 +47,20 @@ has total_time => (
     is  => 'rw',
     isa => Maybe[PositiveNum],
 );
-has schema => (
-    is => 'rw',
-    isa => Maybe[ConsumerOf["eris::role::schema"]],
+
+has 'epoch' => (
+    is      => 'rw',
+    isa     => Num,
+    default => sub { time },
+);
+has 'type' => (
+    is      => 'rw',
+    isa     => Str,
+    default => sub { 'log' },
 );
 
-has index => (
-    is => 'rw',
-    isa => Maybe[Str],
-);
-has type => (
-    is => 'rw',
+has 'uuid' => (
+    is  => 'rw',
     isa => Maybe[Str],
 );
 
@@ -73,10 +76,13 @@ sub add_context {
     }
 
     # Tag the message
-    push @{ $self->tags }, $name;
+    push @{ $self->tags }, $name if $name ne 'raw';
 
     # Install the context
     $complete->{$name} = exists $complete->{$name} ? clone_merge( $complete->{$name}, $href ) : $href;
+
+    # Check for UUID
+    $self->uuid($href->{_id}) if exists $href->{_id};
 
     # Complete merge
     my $ctx = clone_merge( $self->context, $href );
@@ -110,16 +116,11 @@ sub add_timing {
 sub as_doc {
     my ($self,%args) = @_;
 
-    # Check to see we set a valid schema
-    if( my $schema = $self->schema ) {
-        # Default to just the context;
-        my $doc = $args{complete} ? $self->complete : $self->context;
-        $doc->{timing} = $self->timing;
-        $doc->{tags}   = $self->tags;
-        $doc->{total_time} = $self->total_time if $self->total_time;
-        return $doc;
-    }
-    warn "Requesting eris::log->as_doc() but I have schema!";
-    return;
+    # Default to just the context;
+    my $doc = $args{complete} ? $self->complete : $self->context;
+    $doc->{timing} = $self->timing;
+    $doc->{tags}   = $self->tags;
+    $doc->{total_time} = $self->total_time if $self->total_time;
+    return $doc;
 }
 1;

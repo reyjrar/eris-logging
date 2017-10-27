@@ -1,5 +1,6 @@
 package eris::role::pluggable;
 
+use List::Util qw(any);
 use Moo::Role;
 use Types::Standard qw(ArrayRef HashRef InstanceOf Str);
 use namespace::autoclean;
@@ -41,6 +42,7 @@ has 'plugins_config' => (
     is       => 'ro',
     isa      => HashRef,
     default  => sub {{}},
+    init_arg => 'config',
 );
 ########################################################################
 # Builders
@@ -57,9 +59,26 @@ sub _build_loader {
 sub _build_plugins {
     my $self = shift;
     my @plugins = ();
+
+    # Make short hand configs possible
+    my %config = ();
+    my @search = grep { defined && length } ($self->namespace, @{ $self->search_path });
+    foreach my $alias ( keys %{ $self->plugins_config } ) {
+        # Copy into our local hash
+        $config{$alias} = $self->plugins_config->{$alias};
+        # If we find our search path as a prefix, skip
+        next if any { /^$alias/ } @search;
+        foreach my $prefix (@search) {
+            my $class = join('::', $prefix, $alias);
+            next if exists $config{$class};
+            # Copy the config
+            $config{$class} = $config{$alias};
+        }
+    }
     foreach my $class ( $self->loader->plugins ) {
         eval {
-            push @plugins, $class->new(%{ $self->plugins_config });
+            my $opts = $config{$class} || {};
+            push @plugins, $class->new(%{ $opts });
             1;
         } or do {
             my $err = $@;

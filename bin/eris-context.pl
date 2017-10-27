@@ -10,6 +10,7 @@ use FindBin;
 use Getopt::Long::Descriptive;
 use Path::Tiny;
 use eris::log::contextualizer;
+use eris::schemas;
 
 #------------------------------------------------------------------------#
 # Path Setup
@@ -20,6 +21,7 @@ my $path_base = path("$FindBin::Bin")->parent;
 my ($opt,$usage) = describe_options(
     "%c %o ",
     [ 'sample|s:s', "Sample messages from the specified context" ],
+    ['bulk|b',      "Show the bulk output from the schema match instead." ],
     [],
     [ 'config|c:s', "eris config file", {
         callbacks => { exists => sub { -f shift } }
@@ -34,6 +36,7 @@ if( $opt->help ) {
 #------------------------------------------------------------------------#
 # Main
 my $ctxr = eris::log::contextualizer->new( $opt->config ? (config => $opt->config) : () );
+my $schm = eris::schemas->new( $ctxr->config->{schemas} ? %{ $ctxr->config->{schemas} } : () );
 
 my @sampled = ();
 foreach my $c ( @{ $ctxr->contexts->plugins } ) {
@@ -45,7 +48,7 @@ foreach my $c ( @{ $ctxr->contexts->plugins } ) {
 
 if( @sampled ) {
     foreach my $msg ( @sampled ) {
-        p( $ctxr->parse($msg) );
+        dump_record($msg);
     }
 }
 else {
@@ -53,7 +56,19 @@ else {
     while(<>) {
         chomp;
         verbose({color=>'cyan'}, $_);
-        my $l = $ctxr->parse($_);
+        dump_record($_);
+    }
+}
+
+sub dump_record {
+    my $msg = shift;
+    use eris::schema::syslog;
+    my $s = eris::schema::syslog->new();
+    my $l = $ctxr->parse($msg);
+    if( $opt->bulk ) {
+        output({data=>1}, $schm->as_bulk($l));
+    }
+    else {
         p($l);
     }
 }

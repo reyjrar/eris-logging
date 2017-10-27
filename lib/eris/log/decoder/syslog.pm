@@ -47,6 +47,8 @@ sub decode_message {
         }
     };
     return unless exists $decoded{epoch};
+    # Stash this in a safe place
+    $decoded{_epoch} = delete $decoded{epoch};
 
     return \%decoded;
 }

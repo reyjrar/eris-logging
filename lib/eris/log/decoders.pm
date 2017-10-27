@@ -38,6 +38,15 @@ sub _build_namespace { 'eris::log::decoder' }
             my $data = $decoder->decode_message($raw);
             my $decoder_name = "decoder::" . $decoder->name;
             if( defined $data && ref $data eq 'HASH' ) {
+                # Meta Fields
+                foreach my $k (qw(_epoch _schema _type)) {
+                    next unless exists $data->{$k};
+                    my $meta = $k =~ s/^_//r;
+                    no strict 'refs';
+                    $log->$meta( delete $data->{$k} );
+                }
+                $log->unix_timestamp( delete $data->{epoch} ) if $data->{epoch};
+                # Stash the rest of the message
                 $log->add_context($decoder_name => $data);
             }
             $t{$decoder_name} = tv_interval($t0);

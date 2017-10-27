@@ -17,6 +17,7 @@ has config => (
     is       => 'ro',
     isa      => HashRef,
     default  => sub { +{} },
+    coerce   => HashRefFromYAML,
 );
 has contexts => (
     is      => 'ro',
@@ -39,13 +40,13 @@ has 'decoders' => (
 sub _build_decoders {
     my $self = shift;
     return eris::log::decoders->new(
-        %{ $self->config->{decoder} || {} },
+        %{ $self->config->{decoders} || {} },
     );
 }
 sub _build_contexts {
     my $self = shift;
     return eris::log::contexts->new(
-        %{ $self->config->{context} || {} },
+        %{ $self->config->{contexts} || {} },
     );
 }
 
