@@ -88,6 +88,10 @@ sub _build_plugins {
             warn $err unless $suppress_warnings;
         };
     }
-    return [ sort { $a->priority <=> $b->priority || $a->name cmp $b->name } @plugins ];
+    return [
+        sort { $a->priority <=> $b->priority || $a->name cmp $b->name }
+        grep { $_->enabled }
+        @plugins
+    ];
 }
 1;

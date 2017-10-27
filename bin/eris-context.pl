@@ -9,6 +9,9 @@ use Data::Printer;
 use FindBin;
 use Getopt::Long::Descriptive;
 use Path::Tiny;
+use YAML;
+
+use eris::dictionary;
 use eris::log::contextualizer;
 use eris::schemas;
 
@@ -35,7 +38,9 @@ if( $opt->help ) {
 
 #------------------------------------------------------------------------#
 # Main
-my $ctxr = eris::log::contextualizer->new( $opt->config ? (config => $opt->config) : () );
+my $cfg  = $opt->config ? YAML::LoadFile($opt->config) : {};
+my $ctxr = eris::log::contextualizer->new( config => $cfg );
+my $dict = eris::dictionary->new( config => $cfg->{dictionary} );
 my $schm = eris::schemas->new( $ctxr->config->{schemas} ? %{ $ctxr->config->{schemas} } : () );
 
 my @sampled = ();

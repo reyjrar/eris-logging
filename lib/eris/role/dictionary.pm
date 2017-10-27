@@ -19,11 +19,10 @@ with qw(
 sub _build_name {
     my ($self) = shift;
     my ($class) = ref $self;
-    my @path = split /\:\:/, defined $class ? $class : '';
-
-    die "Bad reference to eris::dictionary $class" unless @path > 1;
-
-    return $path[-1];
+    # If we're official, trim the prefix
+    $class =~ s/^eris::dictionary:://;
+    # Replace the colons with underscores
+    return $class =~ s/::/_/gr;
 }
 
 

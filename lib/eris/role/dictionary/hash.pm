@@ -14,7 +14,8 @@ sub lookup {
     if( exists $dict->{lc $field} ) {
         $entry = {
             field => lc $field,
-            description => $dict->{lc $field},
+            ref $dict->{lc $field} eq 'HASH' ? %{ $dict->{lc $field} }
+                : ( description => $dict->{lc $field} ),
         };
     }
     return $entry;

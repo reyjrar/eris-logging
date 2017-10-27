@@ -19,10 +19,6 @@ sub hash {
 }
 1;
 __DATA__
-source The source of the message
-eris_source Where the eris system contextualized this message
-timestamp The timestamp encoded in the message
-message Message contents, often truncated to relevance.
 referer For web request, the Referrer, note, mispelled as in the RFC
 sld Second-Level Domain, ie what you'd buy on a registrar
 filetype File type or Extension
@@ -37,5 +33,3 @@ dst_geoip GeoIP Data for the destination IP
 attacks Attacks root node
 name Name of the event
 class Class of the event
-raw Message as received from the upstream
-timing Store timing data

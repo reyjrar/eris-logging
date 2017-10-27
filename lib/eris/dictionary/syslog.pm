@@ -19,6 +19,8 @@ sub hash {
 }
 1;
 __DATA__
+timestamp The timestamp encoded in the message
+message Message contents, often truncated to relevance.
 severity Syslog severity of the message
 facility Syslog facility of the message
 program The program name or tag that generated the message

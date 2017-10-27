@@ -4,7 +4,6 @@ use Moo;
 use Time::HiRes qw(gettimeofday tv_interval);
 use Types::Standard qw( HashRef InstanceOf );
 
-use eris::base::types qw( HashRefFromYAML );
 use eris::log::contexts;
 use eris::log::decoders;
 use eris::dictionary;
@@ -17,7 +16,6 @@ has config => (
     is       => 'ro',
     isa      => HashRef,
     default  => sub { +{} },
-    coerce   => HashRefFromYAML,
 );
 has contexts => (
     is      => 'ro',

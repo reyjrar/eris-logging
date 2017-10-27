@@ -1,27 +1,29 @@
 package eris::role::plugin;
 
 use Moo::Role;
-use Types::Standard qw(Int Str);
+use Types::Standard qw(Bool Int Str);
 
 ########################################################################
 # Attributes
 has name => (
-    is      => 'ro',
+    is      => 'lazy',
     isa     => Str,
-    lazy    => 1,
-    builder => '_build_name',
 );
 
 has 'priority' => (
-    is      => 'ro',
+    is      => 'lazy',
     isa     => Int,
-    lazy    => 1,
-    builder => '_build_priority',
+);
+
+has 'enabled' => (
+    is => 'lazy',
+    isa => Bool,
 );
 
 ########################################################################
 # Builders
 sub _build_name     { ref $_[0] }
 sub _build_priority { 50 }
+sub _build_enabled  { 1 }
 
 1;

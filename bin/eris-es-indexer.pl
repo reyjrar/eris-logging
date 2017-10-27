@@ -61,6 +61,9 @@ my %CONFIG = (
 my $eris = eris::log::contextualizer->new(
     config => $config,
 );
+my $schemas = eris::schemas->new(
+    exists $config->{schemas} ? ( config => $config->{schemas} ) : (),
+);
 
 # POE Sessions
 my $http_session = POE::Component::Client::HTTP->spawn(
@@ -149,25 +152,20 @@ sub syslog_input {
     return unless defined $msg;
     return unless length $msg;
 
+    # Parse to a eris::log object
     my $log = $eris->parse($msg);
+    # Transform into a bulk request data blob
+    my $bulk_data = $schemas->as_bulk( $log );
 
-    my $doc = $log->as_doc;
-
-    my $time = exists $doc->{epoch} ? delete $doc->{epoch} : time;
-    $doc->{timestamp} = strftime('%FT%T%z',gmtime($time));
-
-    my %meta = ();
-    foreach my $m (qw(_index _type)) {
-        $meta{$m} = exists $doc->{$m} ? delete $doc->{$m} : $heap->{"es_default$m"};
+    if( $bulk_data ) {
+        $heap->{stats}{queued} ||= 0;
+        $heap->{stats}{queued}++;
+        push @{ $heap->{bulk_queue} }, $bulk_data;
     }
-    $meta{_index} = sprintf('%s-%s', $meta{_index}, strftime('%Y.%m.%d', gmtime($time)));
-
-    $heap->{stats}{queued} ||= 0;
-    $heap->{stats}{queued}++;
-
-    push @{ $heap->{bulk_queue} },
-        { index => \%meta },
-        $doc;
+    else {
+        $heap->{stats}{no_schema} ||= 0;
+        $heap->{stats}{no_schema}++;
+    }
 }
 
 sub syslog_error {
@@ -395,12 +393,12 @@ sub es_bulk {
     my $bulk = delete $heap->{bulk_queue};
 
     # Only process and reschedule if we have data
-    if( my $ops = scalar @{ $bulk } ) {
+    if( my $docs = scalar @{ $bulk } ) {
         if( $heap->{es_ready} ) {
             my $req = App::ElasticSearch::Utilities::HTTPRequest->new(POST => sprintf "%s/_bulk", $heap->{es_addr});
-            $req->content($bulk);
+            $req->content(join '', $bulk);
             my $guid = guid_string();
-            $heap->{batch_size}{$guid} = $ops / 2;
+            $heap->{batch_size}{$guid} = $docs;
             $kernel->post( ua => request => es_bulk_resp => $req, $guid );
         }
         else {
