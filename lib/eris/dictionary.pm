@@ -2,8 +2,8 @@ package eris::dictionary;
 
 use Moo;
 with qw(
-    eris::role::pluggable
     MooX::Singleton
+    eris::role::pluggable
 );
 use Types::Standard qw(HashRef);
 use namespace::autoclean;

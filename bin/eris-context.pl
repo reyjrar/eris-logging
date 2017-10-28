@@ -11,6 +11,7 @@ use Getopt::Long::Descriptive;
 use Path::Tiny;
 use YAML;
 
+use eris::dictionary;
 use eris::log::contextualizer;
 use eris::schemas;
 
@@ -39,7 +40,10 @@ if( $opt->help ) {
 # Main
 my $cfg  = $opt->config ? YAML::LoadFile($opt->config) : {};
 my $ctxr = eris::log::contextualizer->new( config => $cfg );
+my $dict = eris::dictionary->new( $cfg->{dictionary} ? %{ $cfg->{dictionary} } : () );
 my $schm = eris::schemas->new( $cfg->{schemas} ? %{ $cfg->{schemas} } : () );
+$dict->lookup('timestamp');
+p($dict);
 
 my @sampled = ();
 foreach my $c ( @{ $ctxr->contexts->plugins } ) {
