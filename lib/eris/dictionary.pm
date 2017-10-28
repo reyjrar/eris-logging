@@ -1,4 +1,5 @@
 package eris::dictionary;
+# ABSTRACT: Global Singleton dictionary object
 
 use Moo;
 with qw(
@@ -8,8 +9,37 @@ with qw(
 use Types::Standard qw(HashRef);
 use namespace::autoclean;
 
-########################################################################
-# Attributes
+=head1 SYNOPSIS
+
+    use eris::dictionary;
+    use YAML;
+
+    my $dict = eris::dictionary->new();
+
+    while(<>) {
+        chomp;
+        foreach my $word (split /\s+/) {
+            my $def = $dict->lookup($word);
+            print Dump $def if $def;
+        }
+    }
+
+=cut
+
+=attr namespace
+
+Defaults to C<eris::dictionary>
+
+=cut
+
+sub _build_namespace { 'eris::dictionary' }
+
+=attr fields
+
+HashRef of fields with true/false values indicated whether they exist in the dictionary.
+
+=cut
+
 has fields => (
     is => 'ro',
     isa => HashRef,
@@ -17,9 +47,6 @@ has fields => (
     builder => '_build_fields',
 );
 
-########################################################################
-# Builders
-sub _build_namespace { 'eris::dictionary' }
 sub _build_fields {
     my ($self) = @_;
 
@@ -40,8 +67,13 @@ sub _build_fields {
     return \%complete;
 }
 
-########################################################################
-# Methods
+=method lookup
+
+Takes a field name, returns the entry for that field from
+the first matching dictionary or undef if nothing is found
+
+=cut
+
 my %_dict = ();
 sub lookup {
     my ($self,$field) = @_;
@@ -55,5 +87,10 @@ sub lookup {
     }
     defined $entry ? $_dict{$field} = $entry : undef;  # Assignment carries Left to Right and is returned;
 }
+
+=head1 SEE ALSO
+
+L<eris::role::dictionary>, L<eris::dictionary::cee>, L<eris::dictionary::eris>,
+L<eris::dictionary::eris::debug>, L<eris::dictionary::syslog>
 
 1;
