@@ -29,7 +29,7 @@ sub contextualize_message {
         $ctxt{src_user} = $parts[0];
         $ctxt{exe} = $parts[1];
         $ctxt{file} = (split /\s+/, $parts[1])[0];
-        $ctxt{action} = 'exec';
+        $ctxt{action} = 'execute';
     }
 
     $log->add_context($self->name,\%ctxt) if keys %ctxt;

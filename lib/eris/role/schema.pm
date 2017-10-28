@@ -40,13 +40,20 @@ has 'use_dictionary' => (
     isa => Bool,
 );
 
+has 'final' => (
+    is => 'lazy',
+    isa => Bool,
+);
+
 has 'flatten' => (
     is => 'lazy',
     isa => Bool,
 );
 
+
 ########################################################################
 # Builders
+sub _build_final          { 1 }
 sub _build_flatten        { 1 }
 sub _build_use_dictionary { 1 }
 sub _build_dictionary     { eris::dictionary->new() }

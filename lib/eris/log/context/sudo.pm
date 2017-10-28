@@ -40,7 +40,7 @@ sub contextualize_message {
     }
     if( exists $ctxt{exe} ) {
         $ctxt{file} = (split /\s+/, $ctxt{exe})[0];
-        $ctxt{action} = 'exec';
+        $ctxt{action} = 'execute';
     }
     $ctxt{src_user} = $user if $user;
 

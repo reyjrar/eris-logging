@@ -24,21 +24,25 @@ sub _build_namespace { 'eris::schema' }
 # Methods
 sub find {
     my ($self,$log) = @_;
-    # Otherwise, find the first match
+    my @schemas = ();
+    # Otherwise, find the schema's collecting this log
     foreach my $p (@{ $self->plugins }) {
         # Jump out as quickly as possible
-        return $p if $p->match_log($log);
+        if( $p->match_log($log) ) {
+            push @schemas, $p;
+            last if $p->final;
+        }
     }
-    # Empty return
-    return;
+    # Return our schemas
+    return @schemas;
 }
 
 sub as_bulk {
     my ($self,$log) = @_;
-    # Find the first matching schema
-    my $schema = $self->find($log);
-    # Return the bulk string or the empty list
-    return $schema ? $schema->as_bulk($log) : ();
+    # Find the matching schemas
+    my @schemas = $self->find($log);
+    # Return the bulk strings or the empty list
+    return @schemas ? map { $_->as_bulk($log) } @schemas : ();
 }
 
 1;
