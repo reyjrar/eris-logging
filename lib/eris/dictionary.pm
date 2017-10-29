@@ -93,4 +93,6 @@ sub lookup {
 L<eris::role::dictionary>, L<eris::dictionary::cee>, L<eris::dictionary::eris>,
 L<eris::dictionary::eris::debug>, L<eris::dictionary::syslog>
 
+=cut
+
 1;

@@ -45,4 +45,6 @@ around 'lookup' => sub {
 L<eris::dictionary>, L<eris::role::plugin>, L<eris::dictionary::cee>,
 L<eris::dictionary::eris>, L<eris::dictionary::syslog>
 
+=cut
+
 1;

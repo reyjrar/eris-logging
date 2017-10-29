@@ -49,7 +49,7 @@ Defaults to a daily index pattern, '%Y.%m.%d' per Logstash.
 
 has 'index_name_strftime' => (
     is => 'lazy',
-    isa => 'Str',
+    isa => Str,
 );
 sub _build_index_name_strftime { '%Y.%m.%d' }
 
@@ -195,6 +195,8 @@ sub as_bulk {
 Takes an L<eris::log> object and returns a hash reference representing that document
 for indexing.
 
+=cut
+
 sub to_document {
     my ($self,$log) = @_;
 
@@ -208,5 +210,6 @@ sub to_document {
     }
     return $doc;
 }
+
 
 1;

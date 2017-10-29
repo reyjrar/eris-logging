@@ -251,6 +251,8 @@ C<eris::log> complete event with the context namespaces as first level keys is
 returned.  By default the C<eris::log> context hash is returned which is a
 merged set of keys from all contexts.
 
+=back
+
 =cut
 
 sub as_doc {

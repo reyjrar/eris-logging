@@ -34,7 +34,7 @@ sub _build_name {
     my ($class) = ref $self;
     my ($namespace) = $self->namespace;
     # Trim Name Space
-    my $name = $class =~ s/^${namsspace}:://r;
+    my $name = $class =~ s/^${namespace}:://r;
 
     # Replace colons with underscores
     return $name =~ s/::/_/gr;
@@ -78,7 +78,7 @@ This is a B<required> parameter.
 
 has 'namespace' => (
     is       => 'ro',
-    isa      => 'Str',
+    isa      => Str,
     required => 1,
 );
 
