@@ -27,7 +27,7 @@ Simplest possible dictionary implementation
 
 =head1 INTERFACE
 
-=head1 hash
+=head2 hash
 
 Return a HashRef with the field names as keys and a string description of the field.
 

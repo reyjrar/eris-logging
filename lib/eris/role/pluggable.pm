@@ -39,7 +39,6 @@ use Types::Standard qw(ArrayRef HashRef InstanceOf Str);
 use namespace::autoclean;
 use Module::Pluggable::Object;
 
-
 =attr namespace
 
 Primary namespace for the plugins for this object. No default provided, you
@@ -189,10 +188,12 @@ sub _build_plugins {
             1;
         } or do {
             my $err = $@;
+            ## no critic
             no strict 'refs';
             my $warn_var = sprintf '%s::SuppressWarnings', $class;
             my $suppress_warnings = eval "$$warn_var" || 0;
             warn $err unless $suppress_warnings;
+            ## use critic
         };
     }
     return [

@@ -8,7 +8,6 @@ use namespace::autoclean;
 ########################################################################
 =head1 INTERFACE
 
-
 =head2 contextualize_message
 
 This method will be called everytime a log matches this context.  It receives
@@ -139,6 +138,8 @@ into the function.
 This context will call C<contextualize_message> on documents with a field
 'src_ip' and call the C<check_bad_ips()> function with the value in the
 'src_ip' field if the sub routine return true.
+
+=back
 
 =back
 

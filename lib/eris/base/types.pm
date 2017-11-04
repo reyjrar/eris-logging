@@ -1,4 +1,8 @@
 package eris::base::types;
+# ABSTRACT: Type for use in the eris libraries
+
+use strict;
+use warnings;
 
 use Type::Library
     -base,

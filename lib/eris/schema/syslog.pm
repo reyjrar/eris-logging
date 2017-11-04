@@ -53,6 +53,8 @@ Matches everything
 # Match *EVERYTHING*
 sub match_log { 1; }
 
+=back
+
 =head1 SEE ALSO
 
 L<eris::role::schema>

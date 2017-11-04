@@ -25,7 +25,7 @@ sub contextualize_message {
 
     my %ctxt = ();
     if( $str =~ / CMD / ) {
-        my @parts = map { s/^\(//; s/\)$//; $_ } split / CMD /, $str;
+        my @parts = map { s/(?:^\()|(?:\)$)//rg } split / CMD /, $str;
         $ctxt{src_user} = $parts[0];
         $ctxt{exe} = $parts[1];
         $ctxt{file} = (split /\s+/, $parts[1])[0];

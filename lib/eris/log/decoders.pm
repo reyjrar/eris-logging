@@ -1,18 +1,17 @@
 package eris::log::decoders;
+# ABSTRACT: Discovery and access for decoders
 
 use eris::log;
-use Moo;
 use Time::HiRes qw(gettimeofday tv_interval);
 use Types::Standard qw(ArrayRef);
+
+use Moo;
 use namespace::autoclean;
 
 with qw(
     eris::role::pluggable
 );
 
-
-########################################################################
-# Attributes
 
 ########################################################################
 # Builders
@@ -42,8 +41,10 @@ sub _build_namespace { 'eris::log::decoder' }
                 foreach my $k (qw(_epoch _schema _type)) {
                     next unless exists $data->{$k};
                     my $meta = $k =~ s/^_//r;
+                    ## no critic (ProhibitNoStrict)
                     no strict 'refs';
                     $log->$meta( delete $data->{$k} );
+                    ## use critic
                 }
                 $log->unix_timestamp( delete $data->{epoch} ) if $data->{epoch};
                 # Stash the rest of the message

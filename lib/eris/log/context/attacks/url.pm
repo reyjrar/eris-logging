@@ -91,7 +91,7 @@ sub contextualize_message {
                                  $ctxt->{crit} >= 300 ?  2 : 1;
 
                 $attack{score} = $score * $multiplier;
-                $attack{triggers} = [ keys %uniq ],
+                $attack{triggers} = [ keys %uniq ];
             }
         }
         $add{$f} = \%attack if keys %attack;

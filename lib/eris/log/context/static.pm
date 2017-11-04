@@ -36,4 +36,4 @@ sub contextualize_message {
         if $self->fields;
 }
 
-__PACKAGE__->meta->make_immutable;
+1;
