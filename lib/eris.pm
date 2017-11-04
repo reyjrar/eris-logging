@@ -145,6 +145,149 @@ Selected example contexts
 
 =head2 DICTIONARY
 
+Dictionaries are used in conjunction with schemas to filter L<eris::log> contexts down to
+only the keys and values we want.  This allows better control of the data headed into storage
+to prevent key space explossons.
+
+=head3 SEE ALSO
+
+=over 4
+
+=item L<eris::dictionary>
+
+Class providing access to installed and configured dictionaries on the system.
+
+=item L<eris::role::schema>
+
+Class which uses the dictionaries to filter structured data into a document.
+
+=item L<eris::role::dictionary>
+
+The abstract role which implements a dictionary.
+
+=item L<eris::dictionary::cee>, L<eris::dictionary::eris::debug>
+
+Selected example contexts
+
+=back
+
 =head2 SCHEMA
+
+Schemas perform the transformation from structured data into documents for
+indexing.  They allow control of the structure and destination of the document
+being indexed.
+
+=head3 SEE ALSO
+
+=over 4
+
+=item L<eris::schemas>
+
+Class providing access to installed and configured schemas on the system.
+
+=item L<eris::role::schema>
+
+The abstract role which implements a schema.
+
+=item L<eris::schema::syslog>
+
+Selected example contexts
+
+=back
+
+=head1 IMPLEMENTATIONS
+
+The goal of eris is to provide a set of tools that can be glued together to
+transform unstructured logging data into structured data and then rules for
+taking that structured data and storing it somewhere.  That sounds cool, but
+there's nothing useful about it unless you can start playing with it now.
+
+This is why eris ship withs sample implementations.
+
+=head2 Scripts
+
+Here's a list of the scripts installed along with eris so you can start
+breaking things.
+
+=over 4
+
+=item B<eris-context.pl>
+
+
+This script allows you to do a few useful things.  To see what happens to unstructured data,
+you can try performing some simple transforms via the built-in C<sample_messages>:
+
+    eris-context.pl --sample sshd
+
+If you'd like to see what those samples look like as ElasticSearch build requests, you can:
+
+    eris-context.pl --sample sshd --bulk
+
+Without the C<--sample> argument, you can feed data to it using STDIN or a file as it'll use
+the Perl magic diamond to read data until an EOF is reached.
+
+To see what the bulk output would look like from a few sources:
+
+Via pipe:
+
+    tail /var/log/messages | eris-context.pl -b
+
+Via a file:
+
+    eris-context.pl -b /var/log/messsages
+
+Via STDIN (for you crazy copy-pastafarians):
+
+    eris-context.pl -b
+
+
+The script provides more options, pull up it's help with:
+
+    eris-context.pl --help
+
+=item B<eris-field-lookup.pl>
+
+This script allows you to query the L<eris::dictionary> to see what it knows
+about a particular field.
+
+    eris-field-lookup.pl src_ip
+
+=item B<eris-es-indexer.pl>
+
+This is a sample implementation that performs indexing of data received over
+syslog to an ElasticSearch cluster.  It will parse all messages passed to it
+over STDIN and send them to an ElasticSearch cluster.  It's single threaded, so
+it won't be able to keep up with a full speed log load.  See it's help output
+for options and details:
+
+    eris-es-indexer.pl --help
+
+=item B<eris-stdin-listener.pl>
+
+This is a wrapper around C<eris-es-indexer.pl> using L<POE::Component::WheelRun::Pool>
+to provide a pool of workers for processing log data at scale.  To use it with syslog-ng:
+
+    destination d_eris { program("/usr/local/bin/eris-stdin-listener.pl" keep-alive(); ); };
+    log  { source(src_network); destination(d_eris); };
+
+See it's help output for options:
+
+    eris-stdin-listener.pl --help
+
+=item B<eris-eris-client.pl>
+
+
+This is a wrapper around C<eris-es-indexer.pl> for use in environments using
+the L<POE::Component::Server::eris> syslog service.  This service is a simple,
+stateless syslog message dispatch system used primarily for development of new
+syslog parser use cases.  It transforms the syslog stream into a subscription
+service any user on the local system can tap.  IF you're using that server, you
+can run the C<eris-eris-client.pl> to leverage L<POE::Component::Client::eris>
+to receive messages from the upstream and dispatch them to a worker pool of
+C<eris-es-indexer.pl>'s.  For more information, see:
+
+    eris-eris-client.pl --help
+
+=back
 
 =cut
