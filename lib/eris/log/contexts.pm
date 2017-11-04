@@ -13,15 +13,38 @@ with qw(
     eris::role::pluggable
 );
 
-########################################################################
-# Attributes
+# VERSION
 
-########################################################################
-# Builders
+=head1 SYNOPSIS
+
+This module isn't meant to be a public interface, you should probably see:
+L<eris::log::contextualizer> so you're doing it right.
+
+=attr namespace
+
+Defaults to 'eris::log::context', add more by setting C<search_path> in your
+config.
+
+    ---
+    contexts:
+      search_path:
+        - 'my::app::context'
+
+=cut
+
 sub _build_namespace { 'eris::log::context' }
 
-########################################################################
-# Methods
+=method contextualize
+
+Takes an instance of an L<eris::log> object that's been returned from a
+a call to L<eris::log::decoders>'s C<decode()> method.
+
+Discovers and iterates through available contexts.  Any contexts which
+successfully match will be passed the L<eris::log> instance to their
+C<contextualize_message> method.
+
+=cut
+
 my $_lookup;
 sub contextualize {
     my ($self,$log) = @_;
@@ -94,5 +117,12 @@ sub contextualize {
 
     return $log;      # Return the log object
 }
+
+=head1 SEE ALSO
+
+L<eris::log::contextualizer>, L<eris::role::context>, L<eris::log>,
+L<eris::log::contexts::sshd>
+
+=cut
 
 1;

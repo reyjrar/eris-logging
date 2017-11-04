@@ -1,4 +1,5 @@
 package eris::log::context::sudo;
+# ABSTRACT: Parses the sudo key=value pairs into structured documents
 
 use Const::Fast;
 use Moo;
@@ -7,12 +8,15 @@ with qw(
 );
 use namespace::autoclean;
 
-const my %MAP => (
-    TTY     => 'dev',
-    COMMAND => 'exe',
-    PWD     => 'location',
-    USER    => 'dst_user',
-);
+# VERSION
+
+=head1 SYNOPSIS
+
+Translates the sudo syslog lines containing "key=value" to structured documents.
+
+=for Pod::Coverage sample_messages
+
+=cut
 
 sub sample_messages {
     my @msgs = split /\r?\n/, <<'EOF';
@@ -21,6 +25,27 @@ Sep 10 19:59:05 ether sudo:     brad : TTY=pts/5 ; PWD=/home/brad ; USER=root ; 
 EOF
     return @msgs;
 }
+
+=method contextualize_message
+
+Transforms the sudo syslog messages into structured data.
+
+    dev      => TTY
+    exe      => COMMAND
+    location => PWD
+    dst_user => USER
+    src_user => from the syslog header
+    action   => literal string 'execute'
+    file     => extracts just the executeable from the 'exe' parameter
+
+=cut
+
+const my %MAP => (
+    TTY     => 'dev',
+    COMMAND => 'exe',
+    PWD     => 'location',
+    USER    => 'dst_user',
+);
 
 sub contextualize_message {
     my ($self,$log) = @_;
@@ -46,5 +71,11 @@ sub contextualize_message {
 
     $log->add_context($self->name,\%ctxt) if keys %ctxt;
 }
+
+=head1 SEE ALSO
+
+L<eris::log::contextualizer>, L<eris::role::context>
+
+=cut
 
 1;

@@ -1,6 +1,11 @@
 package eris::role::plugin;
 # ABSTRACT: Common interface for implementing an eris plugin
 
+use Moo::Role;
+use Types::Standard qw(Bool Int Str);
+
+# VERSION
+
 =head1 SYNOPSIS
 
 Sprinkled into other plugins in the eris project to set
@@ -14,8 +19,6 @@ expectatations for the plugin loaders
 
 =cut
 
-use Moo::Role;
-use Types::Standard qw(Bool Int Str);
 
 =attr name
 

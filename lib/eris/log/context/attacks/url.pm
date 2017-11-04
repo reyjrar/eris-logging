@@ -1,4 +1,5 @@
 package eris::log::context::attacks::url;
+# ABSTRACT: Inspects URL's for common attack patterns
 
 use Const::Fast;
 use Moo;
@@ -7,6 +8,21 @@ use namespace::autoclean;
 with qw(
     eris::role::context
 );
+
+# VERSION
+
+=head1 SYNOPSIS
+
+This context matches any field ending in '_url' and inspects the URL for common
+attack patterns.  This is not sophisticated, but leverages the reconnaisance
+stage of an attack in which attackers try unsophisticated things to look for
+weak spots in your infrastructure.
+
+It was built on the "least work for most reward" principle.  This context is
+prone to false positives and false negatives, but works fast enough to be
+inlined into the log processing pipeline.
+
+=cut
 
 # Web Attack Detection
 const my %WEIGHT => (
@@ -45,10 +61,35 @@ foreach my $type (keys %_RAW) {
 }
 const %_SUSPICIOUS => %_SUSPICIOUS;
 
-# Config this object
+=attr priority
+
+Defaults to 100, running after most other contexts so things can
+end up in the right fields.
+
+=cut
+
 sub _build_priority { 100 }
+
+=attr field
+
+Defaults to '_exists_', meaning it's looking for the presence of certain
+keys in the L<eris::log> context.
+
+=cut
+
 sub _build_field { '_exists_' }
-sub _build_matcher { [qw(resource referer)] }
+
+=attr matcher
+
+Defaults to matching the fields ending with '_url' or fields exact matching 'resource' or 'referer'
+
+=cut
+
+sub _build_matcher { qr/(?:_url$)|(?:^(?:resource|referer)$)/ }
+
+=for Pod::Coverage sample_messages
+
+=cut
 
 sub sample_messages {
     my @msgs = split /\r?\n/, <<EOF;
@@ -56,14 +97,46 @@ EOF
     return @msgs;
 }
 
+=method contextualize_message
+
+Takes an L<eris::log> instance, parses the fields 'resource' and 'referer' for
+attack patterns.
+
+Provides 3 top level keys to the context:
+
+=over 2
+
+=item B<attack_score>
+
+The higher the number, the more likely an attack has been detected.  Takes the
+HTTP response code into account if available.
+
+=item B<attack_triggers>
+
+This is the count of distinct tokens detected in the URL leading us to believe this
+is an attack.
+
+=item B<attacks>
+
+This is a HashRef containing all the tokens and attack signatures tripped.
+
+=back
+
+Tags messages with 'security' if an attack string is detected.
+
+=cut
+
 sub contextualize_message {
     my ($self,$log) = @_;
 
-    my $ctxt = $log->context;
-    my %add = ();
+    my $ctxt     = $log->context;
+    my $re       = $self->matcher;
+    my %add      = ();
+    my $score    = 0;
+    my $triggers = 0;
 
-    foreach my $f ( @{ $self->matcher } ) {
-        next unless exists $ctxt->{$f};
+    foreach my $f ( keys %{ $ctxt } ) {
+        next unless $f =~ /$re/o; # Optimize here, this will always be the same pattern
         my %attack=();
         my $score = 0;
         # Normalize (Lower casing, Unescaping)
@@ -89,18 +162,31 @@ sub contextualize_message {
                                  $ctxt->{crit} >= 500 ? 10 :
                                  $ctxt->{crit} >= 400 ?  5 :
                                  $ctxt->{crit} >= 300 ?  2 : 1;
-
-                $attack{score} = $score * $multiplier;
-                $attack{triggers} = [ keys %uniq ];
+                # Total things up
+                $score    += $attack{score} = $score * $multiplier;
+                $triggers += $attack{triggers} = [ keys %uniq ];
             }
         }
         $add{$f} = \%attack if keys %attack;
     }
 
     if( keys %add ) {
-        $log->add_context($self->name,{ attacks => \%add });
+        # Continue summing incase other things added scores.
+        $score    += $ctxt->{attack_score}    if exists $ctxt->{attack_score};
+        $triggers += $ctxt->{attack_triggers} if exists $ctxt->{attack_triggers};
+        $log->add_context($self->name, {
+            attacks         => \%add,
+            attack_score    => $score,
+            attack_triggers => $triggers,
+        });
         $log->add_tags(qw(security));
     }
 }
+
+=head1 SEE ALSO
+
+L<eris::log::contextualizer>, L<eris::role::context>
+
+=cut
 
 1;

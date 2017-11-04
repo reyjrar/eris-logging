@@ -5,7 +5,8 @@ use Moo::Role;
 use Types::Standard qw(Str Defined Int);
 use namespace::autoclean;
 
-########################################################################
+# VERSION
+
 =head1 INTERFACE
 
 =head2 contextualize_message

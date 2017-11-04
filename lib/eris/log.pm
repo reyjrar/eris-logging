@@ -9,6 +9,8 @@ use Ref::Util qw(is_hashref);
 
 use namespace::autoclean;
 
+# VERSION
+
 =head1 SYNOPSIS
 
 =attr raw

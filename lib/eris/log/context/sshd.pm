@@ -1,20 +1,22 @@
 package eris::log::context::sshd;
+# ABSTRACT: Parse sshd logs into structured data
 
 use Const::Fast;
 use Moo;
 use namespace::autoclean;
-
 with qw(
     eris::role::context
 );
 
-# Constants
-const my %RE => (
-    extract_details => qr/(?:Accepted|Failed) (\S+) for (\S+) from (\S+) port (\S+) (\S+)/,
-);
-const my %F => (
-    extract_details => [qw(driver acct src_ip src_port proto_app)],
-);
+# VERSION
+
+=head1 SYNOPSIS
+
+Parse sshd logs into structured data
+
+=for Pod::Coverage sample_messages
+
+=cut
 
 sub sample_messages {
     my @msgs = split /\r?\n/, <<EOF;
@@ -31,6 +33,29 @@ Jul 26 15:50:21 ether sshd[4291]: Invalid user trudy from 43.229.53.60
 EOF
     return @msgs;
 }
+
+=method contextualize_message
+
+Parses an sshd log and extracts the relevant details
+
+    action    => authentication/..
+    status    => succes/failure/invalid
+    driver    => keyboard/password/public key
+    acct      => user in question
+    proto_app => sshv2 / sshv1
+
+And
+
+    src_ip, src_port
+
+=cut
+
+const my %RE => (
+    extract_details => qr/(?:Accepted|Failed) (\S+) for (\S+) from (\S+) port (\S+) (\S+)/,
+);
+const my %F => (
+    extract_details => [qw(driver acct src_ip src_port proto_app)],
+);
 
 sub contextualize_message {
     my ($self,$log) = @_;
@@ -56,5 +81,11 @@ sub contextualize_message {
 
     $log->add_context($self->name,\%ctxt) if keys %ctxt;
 }
+
+=head1 SEE ALSO
+
+L<eris::log::contextualizer>, L<eris::role::context>
+
+=cut
 
 1;

@@ -1,4 +1,5 @@
 package eris::schemas;
+# ABSTRACT: Discovery and access for schemas
 
 use Moo;
 with qw(
@@ -7,21 +8,44 @@ with qw(
 use Types::Standard qw(HashRef);
 use namespace::autoclean;
 
-########################################################################
-# Attributes
-has fields => (
-    is => 'ro',
-    isa => HashRef,
-    lazy => 1,
-    builder => '_build_fields',
-);
+# VERSION
 
-########################################################################
-# Builders
+=head1 SYNOPSIS
+
+    use eris::schemas;
+    use eris::contextualizer;
+
+    my $schm = eris::schemas->new();
+    my $ctxr = eris::contextualizer->new();
+
+    # Transform each line from STDIN or a file into bulk commands:
+    while( <<>> ) {
+        my $log = $ctxr->contextualize( $_ );
+        print $schm->as_bulk($log);
+    }
+
+=cut
+
+
+=attr namespace
+
+Default namespace is 'eris::schema'
+
+=cut
+
 sub _build_namespace { 'eris::schema' }
 
-########################################################################
-# Methods
+=method find()
+
+Takes an instance of an L<eris::log> you want to index into ElasticSearch.
+
+Discover all possible, enabled schemas according to the C<search_path> as configured,
+find all schemas matching the passed L<eris::log> object.
+
+Returns a list
+
+=cut
+
 sub find {
     my ($self,$log) = @_;
     my @schemas = ();
@@ -36,6 +60,16 @@ sub find {
     # Return our schemas
     return @schemas;
 }
+
+=method as_bulk()
+
+Takes an instance of an L<eris::log> to index into ElasticSearch.
+
+Using the C<find()> method, return a list of the commands necessary to
+bulk index the instance of an L<eris::log> object as an array of new-line delimited
+JSON.
+
+=cut
 
 sub as_bulk {
     my ($self,$log) = @_;

@@ -5,6 +5,8 @@ use Moo::Role;
 use namespace::autoclean;
 with qw(eris::role::dictionary);
 
+# VERSION
+
 =head1 SYNOPSIS
 
 Simplest possible dictionary implementation

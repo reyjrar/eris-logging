@@ -1,6 +1,14 @@
 package eris::role::pluggable;
 # ABSTRACT: Implements the plumbing for an object to support plugins
 
+use List::Util qw(any);
+use Moo::Role;
+use Types::Standard qw(ArrayRef HashRef InstanceOf Str);
+use namespace::autoclean;
+use Module::Pluggable::Object;
+
+# VERSION
+
 =head1 SYNOPSIS
 
 Implements helpers around creating plugins to make things easier to
@@ -30,14 +38,6 @@ plug.
             access => { index_name => 'www-%Y.%m.%d' }
         }
     );
-
-=cut
-
-use List::Util qw(any);
-use Moo::Role;
-use Types::Standard qw(ArrayRef HashRef InstanceOf Str);
-use namespace::autoclean;
-use Module::Pluggable::Object;
 
 =attr namespace
 

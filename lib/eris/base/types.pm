@@ -4,6 +4,14 @@ package eris::base::types;
 use strict;
 use warnings;
 
+# VERSION
+
+=head1 SYNOPSIS
+
+This is eris' type library.
+
+=cut
+
 use Type::Library
     -base,
     -declare => qw(HashRefFromYAML);

@@ -1,6 +1,18 @@
 package eris::role::schema;
 # ABSTRACT: Role for implementing a schema
 
+use JSON::MaybeXS;
+use Moo::Role;
+use POSIX qw(strftime);
+use Types::Standard qw(Bool HashRef InstanceOf Int Str);
+use namespace::autoclean;
+
+with qw(
+    eris::role::plugin
+);
+
+# VERSION
+
 =head1 SYNOPSIS
 
 To implement a schema that takes the processed log entry
@@ -18,16 +30,6 @@ without field filtering, you could:
     sub match_log { 1 }
 
 =cut
-
-use JSON::MaybeXS;
-use Moo::Role;
-use POSIX qw(strftime);
-use Types::Standard qw(Bool HashRef InstanceOf Int Str);
-use namespace::autoclean;
-
-with qw(
-    eris::role::plugin
-);
 
 =head1 INTERFACE
 

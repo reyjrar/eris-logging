@@ -1,10 +1,25 @@
 package eris::dictionary::cee;
+# ABSTRACT: Contains fields in the Common Event Expression syntax
 
 use Moo;
 use namespace::autoclean;
 with qw(
     eris::role::dictionary::hash
 );
+
+# VERSION
+
+=head1 SYNOPSIS
+
+This dictionary contains all the fields as specified by the "Common Event Expression" format.
+
+=head1 SEE ALSO
+
+L<eris::dictionary>, L<eris::role::dictionary>
+
+=for Pod::Coverage hash
+
+=cut
 
 my $_hash=undef;
 sub hash {

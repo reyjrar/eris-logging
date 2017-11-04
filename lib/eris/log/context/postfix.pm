@@ -1,4 +1,5 @@
 package eris::log::context::postfix;
+# ABSTRACT: Parses postfix messages into structured data
 
 use Const::Fast;
 use Moo;
@@ -8,13 +9,23 @@ with qw(
     eris::role::context
 );
 
+# VERSION
+
+=head1 SYNOPSIS
+
+Parses postfix messages to extract relevant and interesting data.
+
+=attr matcher
+
+A regex starting with the word 'postfix'
+
+=cut
+
 sub _build_matcher { qr/^postfix/ }
 
-# Constants
-const my %MAP => qw(
-    from src
-    size in_bytes
-);
+=for Pod::Coverage sample_messages
+
+=cut
 
 sub sample_messages {
     my @msgs = split /\r?\n/, <<'EOF';
@@ -41,6 +52,21 @@ Nov 20 06:44:57 janus postfix/smtpd[15590]: disconnect from localhost[127.0.0.1]
 EOF
     return @msgs;
 }
+
+=method contextualize_message
+
+Parses a postfic messages into a structured thing
+
+TODO: Update these docs with the keys/values
+
+Tags messages with 'mail'
+
+=cut
+
+const my %MAP => qw(
+    from src
+    size in_bytes
+);
 
 sub contextualize_message {
     my ($self,$log) = @_;
@@ -76,5 +102,11 @@ sub contextualize_message {
 
     $log->add_context($self->name,\%ctxt) if keys %ctxt;
 }
+
+=head1 SEE ALSO
+
+L<eris::log::contextualizer>, L<eris::role::context>
+
+=cut
 
 1;

@@ -10,6 +10,8 @@ with qw(
     eris::role::schema
 );
 
+# VERSION
+
 =head1 SYNOPSIS
 
 Simple syslog schema.  Matches all logs and will index them into

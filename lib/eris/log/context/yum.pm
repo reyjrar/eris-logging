@@ -1,12 +1,18 @@
 package eris::log::context::yum;
+# ABSTRACT: Parse the yum syslog output into structured data
 
 use Const::Fast;
 use Moo;
-
 use namespace::autoclean;
 with qw(
     eris::role::context
 );
+
+# VERSION
+
+=for Pod::Coverage sample_messages
+
+=cut
 
 sub sample_messages {
     my @msgs = split /\r?\n/, <<EOF;
@@ -28,6 +34,15 @@ EOF
     return @msgs;
 }
 
+=method contextualize_message
+
+Extracts the package and action from the yum log into:
+
+    action => installed/updated/removed
+    file   => package name with full version
+
+=cut
+
 sub contextualize_message {
     my ($self,$log) = @_;
     my $str = $log->context->{message};
@@ -40,5 +55,11 @@ sub contextualize_message {
 
     $log->add_context($self->name,\%ctxt) if keys %ctxt;
 }
+
+=head1 SEE ALSO
+
+L<eris::log::contextualizer>, L<eris::role::context>
+
+=cut
 
 1;

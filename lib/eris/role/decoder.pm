@@ -1,9 +1,11 @@
 package eris::role::decoder;
 # ABSTRACT: Role for implementing decoders
-#
+
 use Moo::Role;
 use Types::Standard qw( Str Int );
 use namespace::autoclean;
+
+# VERSION
 
 =head1 SYNOPSIS
 

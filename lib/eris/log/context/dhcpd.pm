@@ -1,4 +1,5 @@
 package eris::log::context::dhcpd;
+# ABSTRACT: Parses dhcpd messages into structured data.
 
 use Const::Fast;
 use Moo;
@@ -6,6 +7,16 @@ with qw(
     eris::role::context
 );
 use namespace::autoclean;
+
+# VERSION
+
+=head1 SYNOPSIS
+
+Parses dhcpd messages into structured data.
+
+=for Pod::Coverage sample_messages
+
+=cut
 
 sub sample_messages {
     my @msgs = split /\r?\n/, <<'EOF';
@@ -16,6 +27,20 @@ Jul  4 17:06:59 10.0.1.1 dhcpd: DHCPACK on 10.0.1.33 to f0:f6:1c:b9:20:57 (Neckt
 EOF
     return @msgs;
 }
+
+=method contextualize_message
+
+Parses the DHCP daemon's log into structured data containing the keys:
+
+    action   => DHCPACK/REQUEST/DISCOVER/OFFER
+    dev      => Physical interface
+    src      => Client ID, if specified
+    src_ip   => Source IP Address
+    src_mac  => Source MAC Address
+
+Tags messages with 'inventory'
+
+=cut
 
 sub contextualize_message {
     my ($self,$log) = @_;
@@ -31,5 +56,11 @@ sub contextualize_message {
         $log->add_tags(qw(inventory));
     }
 }
+
+=head1 SEE ALSO
+
+L<eris::log::contextualizer>, L<eris::role::context>
+
+=cut
 
 1;

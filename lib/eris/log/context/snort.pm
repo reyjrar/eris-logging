@@ -1,15 +1,31 @@
 package eris::log::context::snort;
+# ABSTRACT: Parses the Snort and Suricata alert logs
 
 use Moo;
 use namespace::autoclean;
-
 with qw(
     eris::role::context
 );
 
+# VERSION
+
+=head1 SYNOPSIS
+
+This parses data in the Snort and Suricata alert logs into structured data.
+
+=attr matcher
+
+Matches the literal string 'snort' and 'suricata'
+
+=cut
+
 sub _build_matcher {
     [qw(suricata snort)]
 }
+
+=for Pod::Coverage sample_messages
+
+=cut
 
 sub sample_messages {
     my @msgs = split /\r?\n/, <<EOF;
@@ -23,6 +39,23 @@ Jul 26 15:50:21 ether suricata: [1:2008581:3] ET P2P BitTorrent DHT ping request
 EOF
     return @msgs;
 }
+
+=method contextualize_message
+
+Extracts information from the Snort and Suricata alert logs
+
+    name      => rule name
+    class     => rule classification
+    pri       => rule priority
+    proto_app => protocol
+
+And
+
+    src_ip src_port dst_ip dst_port
+
+Tags messages with 'security' and 'ids'.
+
+=cut
 
 sub contextualize_message {
     my ($self,$log) = @_;
@@ -53,5 +86,11 @@ sub contextualize_message {
 
     $log->add_context($self->name,\%ctxt) if keys %ctxt;
 }
+
+=head1 SEE ALSO
+
+L<eris::log::contextualizer>, L<eris::role::context>
+
+=cut
 
 1;

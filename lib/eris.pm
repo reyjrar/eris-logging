@@ -1,9 +1,10 @@
+package eris;
 # ABSTRACT: Eris is the Greek Goddess of Chaos
+
 use strict;
 use warnings;
-package eris;
 
-our $VERSION = 0.001;
+# VERSION
 
 1;
 __END__
@@ -42,6 +43,28 @@ in a config file:
 Decoders operate on the raw string and provide rudimentary key/value pairs for
 the other contexts to operate on.  Unlike the contexts, every discovered decoder is run
 for every message.
+
+=head3 SEE ALSO
+
+=over 4
+
+=item L<eris::log::decoders>
+
+Class providing access to installed and configured decoders on the system.
+
+=item L<eris::log::contextualizer>
+
+Class which uses the decoders to transform the raw data into structured data.
+
+=item L<eris::role::decoder>
+
+The abstract role which implements a decoder.
+
+=item L<eris::log::decoder::syslog>, L<eris::log::decoder::json>
+
+Default implementations of decoders.
+
+=back
 
 =head2 CONTEXT
 
@@ -97,6 +120,28 @@ value equal to the context's C<name> attribute.  For instance,
 L<eris::log::context::sshd> defaults it's name to 'sshd', and since it doesn't
 override the field, this context is only applied to events with a 'program' key
 with a value of 'sshd'.
+
+=head3 SEE ALSO
+
+=over 4
+
+=item L<eris::log::contexts>
+
+Class providing access to installed and configured contexts on the system.
+
+=item L<eris::log::contextualizer>
+
+Class which uses the contexts to transform the raw data into structured data.
+
+=item L<eris::role::context>
+
+The abstract role which implements a context.
+
+=item L<eris::log::context::sshd>, L<eris::log::context::GeoIP>
+
+Selected example contexts
+
+=back
 
 =head2 DICTIONARY
 

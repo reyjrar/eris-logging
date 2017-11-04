@@ -1,4 +1,5 @@
 package eris::log::context::GeoIP;
+# ABSTRACT: Apply MaxMind GeoIPv2 Data to events
 
 use Const::Fast;
 use GeoIP2::Database::Reader;
@@ -10,27 +11,69 @@ with qw(
     eris::role::context
 );
 
+# VERSION
+
+=head1 SYNOPSIS
+
+Use this module to tag geo location data to events with matching
+field names.  You'll probably need to configure the C<geo_db> attribute.
+
+=attr priority
+
+Defaults to 1000, run last.
+
+=cut
+
+sub _build_priority { 1000 }
+
+=attr field
+
+Defaults to '_exists_'
+
+=cut
+
+sub _build_field { '_exists_' }
+
+=attr matcher
+
+A regex matching any string ending in '_ip'.
+
+=cut
+
+sub _build_matcher { qr/_ip$/ }
+
+=attr geo_db
+
+The file location for the GeoIPv2 Databases, defaults to
+'/usr/share/GeoIP/GeoLite2-City.mmdb'.  Set in the config:
+
+    ---
+    contexts:
+      configs:
+        GeoIP:
+          geo_db: '/var/lib/geoip/GeoIP2-Full.mmdb'
+
+=cut
+
 has 'geo_db' => (
     is      => 'ro',
     isa     => Str,
     default => '/usr/share/GeoIP/GeoLite2-City.mmdb',
 );
+
+=attr geo_lookup
+
+This is an instance of a L<GeoIP2::Database::Reader> used to lookup
+GeoIP data for an IP
+
+=cut
+
 has 'geo_lookup' => (
     is      => 'ro',
     isa     => Any,
     lazy    => 1,
     builder => '_build_geo_lookup',
 );
-has 'warnings' => (
-    is      => 'rw',
-    isa     => Bool,
-    default => 0,
-);
-
-# Config this object
-sub _build_priority { 100 }
-sub _build_field { '_exists_' }
-sub _build_matcher { qr/_ip$/ }
 sub _build_geo_lookup {
     my ($self) = @_;
 
@@ -50,11 +93,41 @@ sub _build_geo_lookup {
     return $g;
 }
 
+=attr warnings
+
+Should warnings about this context failing initialization be displayed.
+
+Defaults to false so you won't get spew when the C<geo_db> is missing.
+
+=cut
+
+has 'warnings' => (
+    is      => 'rw',
+    isa     => Bool,
+    default => 0,
+);
+
+=for Pod::Coverage sample_messages
+
+=cut
+
 sub sample_messages {
     my @msgs = split /\r?\n/, <<EOF;
 EOF
     return @msgs;
 }
+
+=method contextualize_message
+
+Inspects the L<eris::log> context for any fields ending in '(.*)_ip'.  If found,
+a new key "${1}_geoip" is created to contain a HashRef with the following data:
+
+    city, country, continent, location, traits, postal_code
+
+The only special elements being, location which is "latitude,longitude" and traits, which
+is an array containing the following possible tags: anonymous, proxy, and/or satellite.
+
+=cut
 
 sub contextualize_message {
     my ($self,$log) = @_;
@@ -99,5 +172,11 @@ sub contextualize_message {
 
     $log->add_context($self->name,\%add) if keys %add;
 }
+
+=head1 SEE ALSO
+
+L<eris::log::contextualizer>, L<eris::role::context>, L<GeoIP2::Database::Reader>
+
+=cut
 
 1;

@@ -1,8 +1,11 @@
 package eris::role::dictionary;
+# ABSTRACT: Interface for implementing a dictionary object
 
 use Moo::Role;
 use Types::Standard qw(Int Str);
 use namespace::autoclean;
+
+# VERSION
 
 =head1 INTERFACE
 

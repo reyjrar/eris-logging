@@ -9,6 +9,8 @@ with qw(
 use Types::Standard qw(HashRef);
 use namespace::autoclean;
 
+# VERSION
+
 =head1 SYNOPSIS
 
     use eris::dictionary;
