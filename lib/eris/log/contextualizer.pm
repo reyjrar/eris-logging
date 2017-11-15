@@ -7,7 +7,6 @@ use Types::Standard qw( HashRef InstanceOf );
 
 use eris::log::contexts;
 use eris::log::decoders;
-use eris::dictionary;
 
 use namespace::autoclean;
 
@@ -36,7 +35,6 @@ A YAML Representation of the root namespaces for the configuration:
     ---
     contexts: {}
     decoders: {}
-    dictionary: {}
     schemas: {}
 
 =cut

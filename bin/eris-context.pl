@@ -8,11 +8,11 @@ use warnings;
 use CLI::Helpers qw(:output);
 use Data::Printer;
 use FindBin;
+use Hash::Flatten qw(flatten);
 use Getopt::Long::Descriptive;
 use Path::Tiny;
 use YAML;
 
-use eris::dictionary;
 use eris::log::contextualizer;
 use eris::schemas;
 
@@ -26,6 +26,8 @@ my ($opt,$usage) = describe_options(
     "%c %o ",
     [ 'sample|s:s', "Sample messages from the specified context" ],
     ['bulk|b',      "Show the bulk output from the schema match instead." ],
+    ['flatten|F',   "Flatten the hash keys, defaults to false."],
+    ['complete|C',  "Use the complete object instead of just the uniqued context."],
     [],
     [ 'config|c:s', "eris config file", {
         callbacks => { exists => sub { -f shift } }
@@ -41,10 +43,7 @@ if( $opt->help ) {
 # Main
 my $cfg  = $opt->config ? YAML::LoadFile($opt->config) : {};
 my $ctxr = eris::log::contextualizer->new( config => $cfg );
-my $dict = eris::dictionary->new( $cfg->{dictionary} ? %{ $cfg->{dictionary} } : () );
 my $schm = eris::schemas->new( $cfg->{schemas} ? %{ $cfg->{schemas} } : () );
-$dict->lookup('timestamp');
-p($dict);
 
 my @sampled = ();
 foreach my $c ( @{ $ctxr->contexts->plugins } ) {
@@ -70,13 +69,14 @@ else {
 
 sub dump_record {
     my $msg = shift;
-    use eris::schema::syslog;
-    my $s = eris::schema::syslog->new();
     my $l = $ctxr->parse($msg);
     if( $opt->bulk ) {
         output({data=>1}, $schm->as_bulk($l));
     }
     else {
-        p($l);
+        p($l->as_doc(
+            $opt->flatten  ? ( flatten => 1 )  : (),
+            $opt->complete ? ( complete => 1 ) : (),
+        ));
     }
 }

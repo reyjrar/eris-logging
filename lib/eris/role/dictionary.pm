@@ -30,19 +30,6 @@ with qw(
     eris::role::plugin
 );
 
-########################################################################
-# Method Augmentation
-around 'lookup' => sub {
-    my $orig = shift;
-    my $self = shift;
-
-    my $entry = $self->$orig(@_);
-    if( defined $entry && ref $entry eq 'HASH' ) {
-        $entry->{from} = $self->name;
-    }
-    $entry; # return'd
-};
-
 =head1 SEE ALSO
 
 L<eris::dictionary>, L<eris::role::plugin>, L<eris::dictionary::cee>,

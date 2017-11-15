@@ -1,9 +1,8 @@
 package eris::dictionary;
-# ABSTRACT: Global Singleton dictionary object
+# ABSTRACT: Field dictionary loader
 
 use Moo;
 with qw(
-    MooX::Singleton
     eris::role::pluggable
 );
 use Types::Standard qw(HashRef);

@@ -75,7 +75,7 @@ decoder in real world situations.
         foreach my $decoder (@{ $decoders }) {
             my $t0 = [gettimeofday];
             my $data = $decoder->decode_message($raw);
-            my $decoder_name = "decoder::" . $decoder->name;
+            my $decoder_name = "decoder_" . $decoder->name;
             if( defined $data && ref $data eq 'HASH' ) {
                 # Meta Fields
                 foreach my $k (qw(_epoch _schema _type)) {

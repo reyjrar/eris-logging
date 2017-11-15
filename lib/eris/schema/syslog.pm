@@ -2,7 +2,6 @@ package eris::schema::syslog;
 # ABSTRACT: Schema for the syslog data
 
 use Moo;
-use eris::dictionary;
 use Types::Standard qw(InstanceOf);
 
 use namespace::autoclean;
@@ -44,7 +43,7 @@ True - Prunes unknown fields (default)
 
 =item B<dictionary>
 
-Defaults to global singleton (default)
+See L<eris::dictionary> for the default configuration
 
 =item B<match_log>
 

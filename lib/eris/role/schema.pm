@@ -1,6 +1,7 @@
 package eris::role::schema;
 # ABSTRACT: Role for implementing a schema
 
+use eris::dictionary;
 use JSON::MaybeXS;
 use Moo::Role;
 use POSIX qw(strftime);
@@ -116,8 +117,8 @@ sub _build_types {
 
 =attr dictionary
 
-An instance of L<eris::dictionary> configured for the schema.  Defaults
-to using the global singleton.
+An instance of L<eris::dictionary> configured for the schema.  Parameters passed via
+the C<dictionary> sub section of the config will be used to build the dictionary.
 
 =cut
 
@@ -125,7 +126,10 @@ has 'dictionary' => (
     is => 'lazy',
     isa => InstanceOf["eris::dictionary"],
 );
-sub _build_dictionary     { eris::dictionary->new() }
+sub _build_dictionary {
+    my $self = shift;
+    return eris::dictionary->new( %{ $self->dictionaries } );
+}
 
 =attr use_dictionary
 
@@ -139,6 +143,17 @@ has 'use_dictionary' => (
     isa => Bool,
 );
 sub _build_use_dictionary { 1 }
+
+=attr dictionaries
+
+A hashref to configure the loading the dictionaries.  Defaults to empty.
+
+=cut
+has 'dictionaries' => (
+    is      => 'ro',
+    isa     => HashRef,
+    default => sub { +{} }
+);
 
 =attr final
 
@@ -212,6 +227,5 @@ sub to_document {
     }
     return $doc;
 }
-
 
 1;

@@ -1,10 +1,11 @@
 package eris::log;
 # ABSTRACT: Structured log or event object implementation
 
+use Hash::Flatten ();
 use Hash::Merge::Simple qw(clone_merge);
 use Moo;
 use Types::Common::Numeric qw(PositiveNum);
-use Types::Standard qw(ArrayRef HashRef Maybe Num Str);
+use Types::Standard qw(ArrayRef Bool HashRef Maybe Num Str);
 use Ref::Util qw(is_hashref);
 
 use namespace::autoclean;
@@ -40,10 +41,10 @@ has decoded => (
 
 =attr context
 
-Flattened hash built by the L<eris::log::contexts->contextualize> step.
+Compressed hash built by the L<eris::log::contexts->contextualize> step.
 Contexts are called in order by priority.  As each context runs, it's possible
 to clobber the context key of a previous context.  This represents the final
-state of the flattened namespace for the structured event.
+state of the compressed namespace for the structured event.
 
 =cut
 
@@ -253,6 +254,25 @@ C<eris::log> complete event with the context namespaces as first level keys is
 returned.  By default the C<eris::log> context hash is returned which is a
 merged set of keys from all contexts.
 
+=item B<flatten>
+
+Do we flatten the key space using L<Hash::Flatten>.  This defaults to false see
+the differences:
+
+    # Default (false)
+    {
+        a => {
+           b => 0,
+           c => 1,
+        }
+    }
+
+    # Flatten (true)
+    {
+       a.b => 0,
+       a.c => 1,
+    }
+
 =back
 
 =cut
@@ -265,7 +285,7 @@ sub as_doc {
     $doc->{timing} = $self->timing;
     $doc->{tags}   = $self->tags;
     $doc->{total_time} = $self->total_time if $self->total_time;
-    return $doc;
+    return $args{flatten} ? Hash::Flatten::flatten($doc) : $doc;
 }
 
 =head1 SEE ALSO
