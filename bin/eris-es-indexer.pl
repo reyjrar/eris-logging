@@ -5,10 +5,9 @@
 use strict;
 use warnings;
 
-use App::ElasticSearch::Utilities::HTTPRequest;
 use Data::GUID qw(guid_string);
-use FindBin;
 use Getopt::Long::Descriptive;
+use HTTP::Request;
 use JSON::MaybeXS;
 use Path::Tiny;
 use POE qw(
@@ -20,8 +19,12 @@ use POE qw(
 use POSIX qw(strftime);
 use YAML qw();
 
+# Hack for Dev
+use FindBin;
 use lib "$FindBin::RealBin/../lib";
+
 use eris::log::contextualizer;
+use eris::schemas;
 
 # Options
 my ($opt,$usage) = describe_options('%c - %o',
@@ -53,8 +56,6 @@ my %CONFIG = (
     # Defaults
     es_addr          => 'http://localhost:9200',
     es_mapping_name  => 'syslog',
-    es_default_type  => 'syslog',
-    es_default_index => 'syslog',
     # Overrides
     %{ $config },
 );
@@ -103,8 +104,6 @@ sub main_stop {  }
 
 sub main_start {
     my ($kernel,$heap) = @_[KERNEL,HEAP];
-
-    print YAML::Dump( $heap );
 
     # Set our alias
     $kernel->alias_set('main');
@@ -156,12 +155,12 @@ sub syslog_input {
     # Parse to a eris::log object
     my $log = $eris->parse($msg);
     # Transform into a bulk request data blob
-    my $bulk_data = $schemas->as_bulk( $log );
+    my @bulk_data = $schemas->as_bulk( $log );
 
-    if( $bulk_data ) {
+    if( @bulk_data ) {
         $heap->{stats}{queued} ||= 0;
-        $heap->{stats}{queued}++;
-        push @{ $heap->{bulk_queue} }, $bulk_data;
+        $heap->{stats}{queued} += @bulk_data;
+        push @{ $heap->{bulk_queue} }, @bulk_data;
     }
     else {
         $heap->{stats}{no_schema} ||= 0;
@@ -178,7 +177,7 @@ sub es_check_mapping {
     my ($kernel,$heap) = @_[KERNEL,HEAP];
     my $mapping_name = sprintf "%s_mapping", $heap->{es_mapping_name};
 
-    my $req = App::ElasticSearch::Utilities::HTTPRequest->new(GET => sprintf("%s/_template/",$heap->{es_addr}));
+    my $req = HTTP::Request->new(GET => sprintf("%s/_template/",$heap->{es_addr}));
     $kernel->post( ua => request => es_check_mapping_resp => $req, $mapping_name );
 }
 
@@ -366,8 +365,8 @@ sub es_mapping {
     );
 
     # Build the Request
-    my $req = App::ElasticSearch::Utilities::HTTPRequest->new(PUT => sprintf("%s/_template/%s_mapping",$heap->{es_addr},$heap->{es_mapping_name}));
-    $req->content($mapping{$opt->es_version});
+    my $req = HTTP::Request->new(PUT => sprintf("%s/_template/%s_mapping",$heap->{es_addr},$heap->{es_mapping_name}));
+    $req->content(encode_json($mapping{$opt->es_version}));
 
     # Submmit it
     $kernel->post( ua => request => es_mapping_resp => $req );
@@ -396,8 +395,9 @@ sub es_bulk {
     # Only process and reschedule if we have data
     if( my $docs = scalar @{ $bulk } ) {
         if( $heap->{es_ready} ) {
-            my $req = App::ElasticSearch::Utilities::HTTPRequest->new(POST => sprintf "%s/_bulk", $heap->{es_addr});
-            $req->content(join '', $bulk);
+            my $req = HTTP::Request->new(POST => sprintf "%s/_bulk", $heap->{es_addr});
+            $req->header('Content-Type', 'application/x-ndjson');
+            $req->content(join '', @{ $bulk });
             my $guid = guid_string();
             $heap->{batch_size}{$guid} = $docs;
             $kernel->post( ua => request => es_bulk_resp => $req, $guid );
