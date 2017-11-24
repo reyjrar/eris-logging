@@ -1,4 +1,4 @@
-#!/usr/bin/env perl
+#!perl
 # PODNAME: eris-stdin-listener.pl
 # ABSTRACT: Simple wrapper to spawn workers for handling syslog stream
 ## no critic (RequireEndWithOne)

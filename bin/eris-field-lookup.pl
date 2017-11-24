@@ -1,4 +1,4 @@
-#!/usr/bin/env perl
+#!perl
 # PODNAME: eris-field-lookup.pl
 # ABSTRACT: Utility for testing the logging contextualizer
 ## no critic (RequireEndWithOne)

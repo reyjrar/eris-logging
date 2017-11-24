@@ -1,4 +1,4 @@
-#!/usr/bin/env perl
+#!perl
 # PODNAME: eris-es-indexer.pl
 # ABSTRACT: Sample implementation using the eris toolkit to index data to elasticsearch
 ## no critic (RequireEndWithOne)
