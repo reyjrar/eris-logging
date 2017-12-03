@@ -16,6 +16,20 @@ with qw(
 Simple syslog schema.  Matches all logs and will index them into
 the B<index_name> specified or C<syslog-%Y.%m.%d> if not provided.
 
+If you'd like to enable the debugging dictionary on this schema, add the
+following to your C<config.yaml>.
+
+    ---
+    schemas:
+      config:
+        syslog:
+          dictionaries:
+            config:
+              eris::debug: { enabled: 1 }
+
+This will index the fields contained in the L<eris::dictionary::eris::debug>
+dictionary.
+
 =head1 PROPERTIES
 
 =over 2
