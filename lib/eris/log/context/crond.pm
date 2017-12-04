@@ -20,7 +20,7 @@ Matches 'cron', 'CROND', '/usr/sbin/cron'
 =cut
 
 sub _build_matcher {
-    [qw(crond cron CROND /usr/sbin/cron)]
+    [qw(crond cron CROND /usr/sbin/cron /USR/SBIN/CRON)]
 }
 
 =for Pod::Coverage sample_messages

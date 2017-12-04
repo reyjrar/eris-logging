@@ -32,7 +32,7 @@ my ($opt,$usage) = describe_options(
 # Main
 my $cfg = $opt->config ? YAML::LoadFile($opt->config) : {};
 my %args = exists $cfg->{dictionary} && ref $cfg->{dictionary} eq 'HASH' ? %{ $cfg->{dictionary} } : ();
-my $dict = eris::dictionary->instance(%args);
+my $dict = eris::dictionary->new(%args);
 
 if( $opt->list ) {
     my $fields = $dict->fields;

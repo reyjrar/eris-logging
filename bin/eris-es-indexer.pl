@@ -64,7 +64,7 @@ my $eris = eris::log::contextualizer->new(
     config => $config,
 );
 my $schemas = eris::schemas->new(
-    exists $config->{schemas} ? ( config => $config->{schemas} ) : (),
+    exists $config->{schemas} ? ( %{ $config->{schemas} } ) : (),
 );
 
 # POE Sessions
@@ -229,7 +229,7 @@ sub es_mapping {
                                     country     => { type => 'string', index => 'not_analyzed' },
                                     continent   => { type => 'string', index => 'not_analyzed' },
                                     postal_code => { type => 'string', index => 'not_analyzed' },
-                                    location    => { type => 'geopoint', lat_lon => 'true' },
+                                    location    => { type => 'geo_point' },
                                 }
                             },
                         }},
@@ -309,7 +309,7 @@ sub es_mapping {
                                     country     => { type => 'keyword' },
                                     continent   => { type => 'keyword' },
                                     postal_code => { type => 'keyword' },
-                                    location    => { type => 'geopoint', lat_lon => 'true' },
+                                    location    => { type => 'geo_point' },
                                 }
                             },
                         }},
