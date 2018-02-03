@@ -7,18 +7,12 @@ use warnings;
 
 use CLI::Helpers qw(:output);
 use Data::Printer;
-use FindBin;
 use Hash::Flatten qw(flatten);
 use Getopt::Long::Descriptive;
-use Path::Tiny;
 use YAML;
 
 use eris::log::contextualizer;
 use eris::schemas;
-
-#------------------------------------------------------------------------#
-# Path Setup
-my $path_base = path("$FindBin::Bin")->parent;
 
 #------------------------------------------------------------------------#
 # Argument Parsing

@@ -151,7 +151,7 @@ sub main_start {
         StatsHandler => sub {
             my ($stats) = @_;
             if( is_hashref($stats) ) {
-                foreach my $k ( $stats ) {
+                foreach my $k ( keys %$stats ) {
                     $heap->{stats}{$k} ||= 0;
                     $heap->{stats}{$k} += $stats->{$k};
                 }

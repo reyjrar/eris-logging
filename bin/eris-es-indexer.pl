@@ -19,10 +19,7 @@ use POE qw(
 use POSIX qw(strftime);
 use YAML qw();
 
-# Hack for Dev
-use FindBin;
-use lib "$FindBin::RealBin/../lib";
-
+# Load the eris libraries
 use eris::log::contextualizer;
 use eris::schemas;
 
