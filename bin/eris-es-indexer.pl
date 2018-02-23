@@ -7,6 +7,7 @@ use warnings;
 
 use Getopt::Long::Descriptive;
 use Path::Tiny;
+sub POE::Kernel::ASSERT_DEFAULT { 1 }
 use POE qw(
     Component::ElasticSearch::Indexer
     Wheel::ReadWrite
@@ -60,10 +61,6 @@ my $schemas = eris::schemas->new(
 );
 
 # POE Sessions
-my $http_session = POE::Component::Client::HTTP->spawn(
-    Alias   => 'ua',
-    Timeout => 60,
-);
 my $main_session = POE::Session->create(
         inline_states => {
             _start       => \&main_start,
