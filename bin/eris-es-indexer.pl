@@ -180,4 +180,5 @@ sub es_bulk {
 sub syslog_error {
     my ($kernel,$heap) = @_[KERNEL,HEAP];
     delete $heap->{io};
+    $kernel->post( es => 'shutdown' );
 }
