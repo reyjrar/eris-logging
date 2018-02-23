@@ -65,6 +65,7 @@ my $main_session = POE::Session->create(
         inline_states => {
             _start       => \&main_start,
             _stop        => \&main_stop,
+            _child       => \&main_child,
             stats        => \&main_stats,
             syslog_input => \&syslog_input,
             syslog_error => \&syslog_error,
@@ -79,7 +80,17 @@ my $main_session = POE::Session->create(
 POE::Kernel->run();
 exit 0;
 
-sub main_stop {  }
+sub main_stop {
+    $poe_kernel->post( es => 'shutdown' );
+}
+
+sub main_child {
+    my ($kernel,$heap,$reason,$child) = @_[KERNEL,HEAP,ARG0,ARG1];
+
+    my $stat = "child_$reason";
+    $heap->{stats}{$stat} ||= 0;
+    $heap->{stats}{$stat}++;
+}
 
 sub main_start {
     my ($kernel,$heap) = @_[KERNEL,HEAP];
