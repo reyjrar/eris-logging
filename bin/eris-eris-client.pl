@@ -6,7 +6,6 @@ use strict;
 use warnings;
 
 use FindBin;
-use Hash::Merge::Simple qw(clone_merge);
 use Getopt::Long::Descriptive;
 use Path::Tiny;
 use POE qw(
