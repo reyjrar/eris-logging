@@ -24,7 +24,7 @@ use eris::schemas;
 my ($opt,$usage) = describe_options('%c - %o',
     [ 'config:s', 'Config file, required.', { callbacks => { "Must be a readable file" => sub { -r $_[0] } } } ],
     [ 'stats-interval:i',   'Interval in seconds to send statistics, default: 60', { default => 60 }],
-    [ 'flush-interval|F:i', 'Override the default FlushInterval from POE::Component::ElasticSearch::Indexer' ],
+    [ 'flush-interval|F:i', 'Interval in seconds to flush the queue to thebulk handler, default: 10', { default => 10 } ],
     [ 'flush-size|S:i',     'Override the default FlushSize from POE::Component::ElasticSearch::Indexer' ],
     [],
     [ 'help',  'Display this help' ],
@@ -66,8 +66,7 @@ my $main_session = POE::Session->create(
             es_bulk      => \&es_bulk,
         },
         heap => {
-            %{ $config },
-            bulk_queue       => [],
+            bulk_queue    => [],
         },
 );
 
