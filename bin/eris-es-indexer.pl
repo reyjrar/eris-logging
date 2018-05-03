@@ -24,7 +24,8 @@ use eris::schemas;
 my ($opt,$usage) = describe_options('%c - %o',
     [ 'config:s', 'Config file, required.', { callbacks => { "Must be a readable file" => sub { -r $_[0] } } } ],
     [ 'stats-interval:i',   'Interval in seconds to send statistics, default: 60', { default => 60 }],
-    [ 'flush-interval|F:i', 'Interval in seconds to flush the bulk queue, default: 15', { default => 15 } ],
+    [ 'flush-interval|F:i', 'Override the default FlushInterval from POE::Component::ElasticSearch::Indexer' ],
+    [ 'flush-size|S:i',     'Override the default FlushSize from POE::Component::ElasticSearch::Indexer' ],
     [],
     [ 'help',  'Display this help' ],
 );
@@ -45,13 +46,6 @@ if( $opt->config ) {
             $opt->config, $@;
     };
 }
-my %CONFIG = (
-    # Defaults
-    es_addr          => 'http://localhost:9200',
-    es_mapping_name  => 'syslog',
-    # Overrides
-    %{ $config },
-);
 # Instantiate our object
 my $eris = eris::log::contextualizer->new(
     config => $config,
@@ -72,7 +66,7 @@ my $main_session = POE::Session->create(
             es_bulk      => \&es_bulk,
         },
         heap => {
-            %CONFIG,
+            %{ $config },
             bulk_queue       => [],
         },
 );
@@ -111,8 +105,6 @@ sub main_start {
     # Handle ElasticSearch Indexing
     $heap->{indexer} = POE::Component::ElasticSearch::Indexer->spawn(
         Alias => 'es',
-        Timeout => 10,
-        FlushInterval => $opt->flush_interval,
         StatsInterval => $opt->stats_interval,
         StatsHandler => sub {
             my ($stats) = @_;
@@ -121,6 +113,10 @@ sub main_start {
                 $heap->{stats}{$k} += $stats->{$k};
             }
         },
+        $config->{elasticsearch} ? %{ $config->{elasticsearch} } : (),
+        # Allow to override if specififed
+        $opt->flush_size     ? (FlushSize => $opt->flush_size) : (),
+        $opt->flush_interval ? (FlushInterval => $opt->flush_interval) : (),
     );
 }
 
