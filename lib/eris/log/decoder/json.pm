@@ -1,7 +1,6 @@
 package eris::log::decoder::json;
 # ABSTRACT: Decodes any detected JSON in a log line from then opening curly brace
 
-use Const::Fast;
 use JSON::MaybeXS;
 use Moo;
 use namespace::autoclean;
