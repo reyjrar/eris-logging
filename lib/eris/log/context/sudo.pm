@@ -49,18 +49,16 @@ const my %MAP => (
 
 sub contextualize_message {
     my ($self,$log) = @_;
-    my $str = $log->context->{message};
+    my $c = $log->context;
+    my $sdata = $c->{sdata};
+    my $str   = $c->{message};
 
     my %ctxt = ();
 
     my ($user,$variables) = split ' : ', $str, 2;
-    if( defined $variables ) {
-        chomp($variables);
-        foreach my $pair (split ' ; ', $variables) {
-            my ($k,$v) = split '=', $pair;
-            if(exists $MAP{$k}) {
-                $ctxt{$MAP{$k}} = $v;
-            }
+    foreach my $k (sort keys %MAP) {
+        if( exists $sdata->{$k} ) {
+            $ctxt{$MAP{$k}} = $sdata->{$k};
         }
     }
     if( exists $ctxt{exe} ) {
