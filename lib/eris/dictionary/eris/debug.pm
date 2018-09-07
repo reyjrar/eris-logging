@@ -34,7 +34,7 @@ Defaults to false, or disabled, set:
 
 =cut
 
-sub _build_enabled  { 0   }
+sub _build_enabled  { 0 }
 
 =for Pod::Coverage hash
 

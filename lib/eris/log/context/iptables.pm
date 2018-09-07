@@ -76,7 +76,6 @@ sub contextualize_message {
     my ($self,$log) = @_;
 
     my $content = $log->context->{message};
-
     my %data = ();
 
     foreach my $token (split /\s+/, $content) {
@@ -94,8 +93,11 @@ sub contextualize_message {
             $data{dev} = delete $data{$dir};
             $data{"${dir}_bytes"} = delete $data{len};
         }
+        # Override the perceived program
+        $data{program} = 'iptables';
+        # Add our contextual data
         $log->add_context($self->name,\%data);
-        $log->add_tags(qw(security firewall));
+        $log->add_tags(qw(security firewall kernel));
     }
 }
 
