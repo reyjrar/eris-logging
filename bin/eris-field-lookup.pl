@@ -17,7 +17,7 @@ my ($opt,$usage) = describe_options(
     "%c %o <fields to lookup>",
     [ 'list|l',     "list all available fields" ],
     [],
-    [ 'config|c:s', "eris config file", {
+    [ 'config|c=s', "eris config file", {
         callbacks => { exists => sub { -f shift } }
     }],
 );

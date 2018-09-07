@@ -18,12 +18,12 @@ use eris::schemas;
 # Argument Parsing
 my ($opt,$usage) = describe_options(
     "%c %o ",
-    [ 'sample|s:s', "Sample messages from the specified context" ],
+    [ 'sample|s=s', "Sample messages from the specified context" ],
     ['bulk|b',      "Show the bulk output from the schema match instead." ],
     ['flatten|F',   "Flatten the hash keys, defaults to false."],
     ['complete|C',  "Use the complete object instead of just the uniqued context."],
     [],
-    [ 'config|c:s', "eris config file", {
+    [ 'config|c=s', "eris config file", {
         callbacks => { exists => sub { -f shift } }
     }],
     [ 'help' => 'Display this message and exit', { shortcircuit => 1 } ],
