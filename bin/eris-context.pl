@@ -8,6 +8,7 @@ use warnings;
 use CLI::Helpers qw(:output);
 use Data::Printer;
 use Hash::Flatten qw(flatten);
+use JSON::MaybeXS;
 use Getopt::Long::Descriptive;
 use YAML;
 
@@ -20,6 +21,7 @@ my ($opt,$usage) = describe_options(
     "%c %o ",
     [ 'sample|s=s', "Sample messages from the specified context" ],
     ['bulk|b',      "Show the bulk output from the schema match instead." ],
+    ['json|j',      "Show the structure are JSON." ],
     ['flatten|F',   "Flatten the hash keys, defaults to false."],
     ['complete|C',  "Use the complete object instead of just the uniqued context."],
     [],
@@ -64,13 +66,17 @@ else {
 sub dump_record {
     my $msg = shift;
     my $l = $ctxr->parse($msg);
+    my $v = $l->as_doc(
+                $opt->flatten  ? ( flatten => 1 )  : (),
+                $opt->complete ? ( complete => 1 ) : (),
+            );
     if( $opt->bulk ) {
         output({data=>1}, $schm->as_bulk($l));
     }
+    elsif( $opt->json ) {
+        output({data=>1}, encode_json($v));
+    }
     else {
-        p($l->as_doc(
-            $opt->flatten  ? ( flatten => 1 )  : (),
-            $opt->complete ? ( complete => 1 ) : (),
-        ));
+        p($v);
     }
 }
