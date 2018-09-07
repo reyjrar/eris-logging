@@ -20,7 +20,7 @@ and attempted to decode.
 This means the whole message doesn't need to be JSON, so you can syslog JSON
 and the L<eris::log::decoder::syslog> will properly handle the syslog headers
 and structure.  This decoder will then grab that JSON hashref and parse it
-correcty.
+correctly.
 
 =attr priority
 

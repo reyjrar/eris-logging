@@ -185,6 +185,46 @@ has 'flatten' => (
 );
 sub _build_flatten        { 1 }
 
+=attr es_version
+
+The ElasticSearch version to target for commands and mappings.  Defaults to B<6.4>.
+
+=cut
+
+has 'es_version' => (
+    is      => 'ro',
+    isa     => Str,
+    default => sub { '6.4' },
+);
+
+=attr es_template
+
+The ElasticSearch index template definition from this schema.
+
+=cut
+
+has 'es_template' => (
+    is  => 'lazy',
+    isa => HashRef,
+);
+sub _build_es_template {
+    my $self = shift;
+
+    return {
+        ($self->es_version > 6 ? 'index_pattern' : 'template' ) => sprintf "%s-*", $self->name,
+        mapping => {
+            dynamic_properties => [
+                {
+                },
+            ],
+            properties => {
+                timestamp => { type => 'datetime' },
+                time      => { type => 'datetime' },
+            },
+        }
+    };
+}
+
 =method as_bulk
 
 Takes an L<eris::log> object and returns the bulk newline delimited JSON to add

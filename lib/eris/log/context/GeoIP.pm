@@ -1,5 +1,5 @@
 package eris::log::context::GeoIP;
-# ABSTRACT: Apply MaxMind GeoIPv2 Data to events
+# ABSTRACT: Apply MaxMind GeoIP Data to events
 
 use Const::Fast;
 use GeoIP2::Database::Reader;
@@ -44,7 +44,7 @@ sub _build_matcher { qr/_ip$/ }
 
 =attr geo_db
 
-The file location for the GeoIPv2 Databases, defaults to
+The file location for the GeoIP version 2 databases, defaults to
 '/usr/share/GeoIP/GeoLite2-City.mmdb'.  Set in the config:
 
     ---

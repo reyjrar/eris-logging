@@ -15,7 +15,7 @@ This dictionary adds fields the L<eris::log::contextualizer> may add to a docume
 
 =attr priority
 
-Defaults to 100, or lastish.
+Defaults to 100, or near the end
 
 =cut
 

@@ -17,7 +17,7 @@ a schema if you'd like to evaluate the parser performance.
 
 =attr priority
 
-Defaults to 100, lastish
+Defaults to 100 to try to load last
 
 =cut
 

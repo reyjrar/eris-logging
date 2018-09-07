@@ -15,7 +15,7 @@ with qw(
 =head1 SYNOPSIS
 
 This context matches any field ending in '_url' and inspects the URL for common
-attack patterns.  This is not sophisticated, but leverages the reconnaisance
+attack patterns.  This is not sophisticated, but leverages the reconnaissance
 stage of an attack in which attackers try unsophisticated things to look for
 weak spots in your infrastructure.
 
@@ -28,6 +28,10 @@ inlined into the log processing pipeline.
 my %SUSPICIOUS = ();
 # Not significant on their own
 const my %NeedsMore => map { $_ => 1 } qw(select union update table sleep alter alert drop delete rand > \\), '&#';
+
+=for Pod::Coverage BUILD
+
+=cut
 
 sub BUILD {
 

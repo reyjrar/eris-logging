@@ -58,7 +58,7 @@ has context => (
 =attr complete
 
 Also populated by the L<eris::log::contexts->contextualize> step, but uses a
-first level key of the context name to preserve where information orignated
+first level key of the context name to preserve where information originated
 and protect duplicate keys.
 
 =cut
@@ -148,7 +148,7 @@ has 'type' => (
 
 =attr uuid
 
-Optional GUID reperesentation.  If set will be passed along to Elasticsearch as
+Optional GUID representation.  If set will be passed along to Elasticsearch as
 the document B<_id>, otherwise Elasticsearch will autogenerate it.
 
 Unless you know what you're doing, you probably shouldn't set this in your
@@ -203,7 +203,7 @@ sub add_context {
 
 =method add_tags
 
-Takes a list of string tags to add to the object.  Deduplicates and adds new
+Takes a list of string tags to add to the object.  Dedupes and adds new
 tags to the object.
 
 =cut

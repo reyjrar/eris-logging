@@ -9,7 +9,7 @@ use Types::Standard qw(Bool Int Str);
 =head1 SYNOPSIS
 
 Sprinkled into other plugins in the eris project to set
-expectatations for the plugin loaders
+expectations for the plugin loaders
 
 
     package eris::role::context;
@@ -23,7 +23,7 @@ expectatations for the plugin loaders
 =attr name
 
 The name of the plugin.  Defaults to stripping the plugin namespace from the
-object's class name and replacing '::' withn an underscore.
+object's class name and replacing '::' within an underscore.
 
 =cut
 

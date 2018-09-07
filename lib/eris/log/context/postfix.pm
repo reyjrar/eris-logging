@@ -55,9 +55,19 @@ EOF
 
 =method contextualize_message
 
-Parses a postfic messages into a structured thing
+Parses a postfix messages into a structured document, extracting status
+information, IP addresses, and email addresses.
 
-TODO: Update these docs with the keys/values
+    action    => Connect/Disconnect, etc.
+    dst_ip    => Receiver IP
+    dst_user  => "To" email address
+    proc      => Postfix daemon issuing the message, e.g.: smtpd, anvil
+    program   => Set to 'postfix' for simplicity
+    proto_app => ESMTP, SMTP, LMTP, etc.
+    src       => Advertised server name taking action
+    src_ip    => Sender IP
+    src_user  => "From" email address
+    status    => Whether the operation was successful
 
 Tags messages with 'mail'
 

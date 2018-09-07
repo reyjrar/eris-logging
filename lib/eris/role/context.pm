@@ -11,7 +11,7 @@ use namespace::autoclean;
 
 =head2 contextualize_message
 
-This method will be called everytime a log matches this context.  It receives
+This method will be called every time a log matches this context.  It receives
 an C<eris::log> object.  Call C<eris::log->add_context> with the name of the
 context to add to the log context.
 
@@ -157,7 +157,7 @@ sub _build_field { 'program' }
 
 =attr B<matcher>
 
-Maybe a B<String>, B<Regex>, B<ArrayRef>, or a B<CodeRef>. See documenation on
+Maybe a B<String>, B<Regex>, B<ArrayRef>, or a B<CodeRef>. See documentation on
 L<field> for information on the combinations and how to use them.
 
 =cut

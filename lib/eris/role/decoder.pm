@@ -9,7 +9,7 @@ use namespace::autoclean;
 
 =head1 SYNOPSIS
 
-Implement your own decoders, eg:
+Implement your own decoders, e.g.:
 
     use Parse::Syslog::Line;
     use Moo;

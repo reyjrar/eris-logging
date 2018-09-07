@@ -1,5 +1,5 @@
 package eris::log::context::pfSense::filterlog;
-# ABSTRACT: Parse the pfsense filterlog
+# ABSTRACT: Parse the pfSense filterlog
 
 use Moo;
 with qw(

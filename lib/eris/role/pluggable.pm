@@ -113,7 +113,7 @@ sub _build_loader {
 =attr plugins_config
 
 A HashRef of configs for passing along to our plugins. The init arg for this
-parameter is 'config' to simplify instantiation and config files.
+parameter is 'config' to simplify creation and config files.
 
 Special considerations are taken when processing the hash.  The C<namespace> and C<search_path> are
 automatically prepended to all keys to allow pretty config.  This means I can pass a config like this:
