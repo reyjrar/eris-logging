@@ -20,6 +20,7 @@ use eris::schemas;
 my ($opt,$usage) = describe_options(
     "%c %o ",
     [ 'sample|s=s', "Sample messages from the specified context" ],
+    ['schema|filtered|f', "Show the schema fitlered output from the schema match instead." ],
     ['bulk|b',      "Show the bulk output from the schema match instead." ],
     ['json|j',      "Show the structure are JSON." ],
     ['flatten|F',   "Flatten the hash keys, defaults to false."],
@@ -66,7 +67,8 @@ else {
 sub dump_record {
     my $msg = shift;
     my $l = $ctxr->parse($msg);
-    my $v = $l->as_doc(
+    my $v = $opt->schema ? $schm->to_document($l)
+          : $l->as_doc(
                 $opt->flatten  ? ( flatten => 1 )  : (),
                 $opt->complete ? ( complete => 1 ) : (),
             );

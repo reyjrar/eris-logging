@@ -79,4 +79,22 @@ sub as_bulk {
     return @schemas ? map { $_->as_bulk($log) } @schemas : ();
 }
 
+=method to_document()
+
+Takes an instance of an L<eris::log> to index into ElasticSearch.
+
+Using the C<find()> method, return the first document to be created from the
+L<eris::log> entry.
+
+=cut
+
+sub to_document {
+    my ($self,$log) = @_;
+    # Find the matching schemas
+    my @schemas = $self->find($log);
+    # Return the document or the empty list
+    return @schemas ? $schemas[0]->to_document($log) : ();
+}
+
+
 1;
