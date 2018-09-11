@@ -55,7 +55,7 @@ sub _build_fields {
     foreach my $p ( @{ $self->plugins } ) {
         foreach my $f ( @{ $p->fields } ) {
             if( exists $complete{$f} ) {
-                warn sprintf "Duplicated field '%s' in dictionaies, %s authoratitive, %s conflicting.",
+                warn sprintf "Duplicated field '%s' in dictionaries, %s authoratitive, %s conflicting.",
                     $f,
                     $complete{$f},
                     $p->name;
