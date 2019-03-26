@@ -87,8 +87,8 @@ sub _build_geo_lookup {
     } or do {
         my $err = $@;
         warn sprintf "Failed loading GeoIP Database '%s' with error: %s",
-            $self->geo_db,
-            $err;
+            ( $self->geo_db || 'unspecified' ),
+            ( $err || 'unknown error');
     };
     return $g;
 }

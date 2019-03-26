@@ -156,7 +156,7 @@ sub main_start {
                 }
             }
             else {
-                printf STDERR "StatsHandler did not receive a hashref.\n";
+                print STDERR "StatsHandler did not receive a hashref.\n";
             }
         },
         StdoutHandler => sub {
