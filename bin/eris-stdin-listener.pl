@@ -83,7 +83,7 @@ sub main_start {
 }
 
 sub main_stats {
-    my ($kernel,$heap) = @_;
+    my ($kernel,$heap) = @_[KERNEL,HEAP];
 
     my $stats = exists $heap->{stats} ? delete $heap->{stats} : {};
 
