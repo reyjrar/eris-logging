@@ -50,7 +50,6 @@ sub _build_priority { 100 }
 
 100 - Try hard to be last
 
-
 =item B<use_dictionary>
 
 True - Prunes unknown fields (default)
