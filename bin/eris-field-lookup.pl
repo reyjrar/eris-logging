@@ -20,7 +20,13 @@ my ($opt,$usage) = describe_options(
     [ 'config|c=s', "eris config file", {
         callbacks => { exists => sub { -f shift } }
     }],
+    [],
+    ['help', 'Display this help', { shortcircuit => 1 }],
 );
+if( $opt->help ) {
+    print $usage->text;
+    exit 0;
+}
 
 #------------------------------------------------------------------------#
 # Main

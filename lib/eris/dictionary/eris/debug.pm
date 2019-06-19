@@ -49,6 +49,10 @@ sub hash {
         timing => {
             type => 'object',
             description => 'Timing details for each step of the parsing',
+            properties => {
+                phase => { type => 'keyword' },
+                seconds => { type => 'float' },
+            }
         },
         total_time => {
             type => 'double',

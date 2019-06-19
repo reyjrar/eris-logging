@@ -2,6 +2,7 @@ package eris::role::dictionary::hash;
 # ABSTRACT: Simple dictionary implementation based off a hash
 
 use Moo::Role;
+use JSON::MaybeXS;
 use namespace::autoclean;
 with qw(eris::role::dictionary);
 
@@ -66,6 +67,7 @@ sub lookup {
     if( exists $dict->{$field} ) {
         $entry = {
             field => $field,
+            type  => 'keyword',
             ref $dict->{$field} eq 'HASH' ? %{ $dict->{$field} }
                 : ( description => $dict->{$field} ),
         };
@@ -82,6 +84,35 @@ Returns the sorted list of keys in the lookup hash
 sub fields {
     my ($self) = @_;
     return [ sort keys %{ $self->hash }  ];
+}
+
+=method expand_line
+
+Expand a line in a file/DATA section to a workable hash
+
+=cut
+
+sub expand_line {
+    my ($self,$line) = @_;
+
+    my ($k,$v);
+    if( $line =~ /^{/ ) {
+        eval {
+            my $field = decode_json($line);
+            $k = lc delete $field->{name};
+            $v = $field;
+        } or do {
+            my $err = $@;
+            warn "BAD JSON: $err\n\n$line\n";
+        };
+    }
+    else {
+        my ($field,$desc) = split /\s+/, $line, 2;
+        $k = lc $field;
+        $v = $desc;
+    }
+
+    return $k ? ( $k => $v ) : ();
 }
 
 =head1 SEE ALSO

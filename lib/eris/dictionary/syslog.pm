@@ -47,7 +47,7 @@ L<eris::dictionary>, L<eris::role::dictionary>
 
 1;
 __DATA__
-timestamp The timestamp encoded in the message
+{ "name": "timestamp", "type": "date", "description": "The timestamp encoded in the message" }
 message Message contents, often truncated to relevance.
 severity Syslog severity of the message
 facility Syslog facility of the message

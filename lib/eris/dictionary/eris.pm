@@ -27,12 +27,14 @@ sub _build_priority { 100; }
 
 my $_hash=undef;
 sub hash {
+    my $self = shift;
     return $_hash if defined $_hash;
     my %data;
     while(<DATA>) {
         chomp;
-        my ($k,$desc) = split /\s+/, $_, 2;
-        $data{lc $k} = $desc;
+        my ($field,$def) = $self->expand_line($_);
+        next unless $field;
+        $data{$field} = $def;
     }
     $_hash = \%data;
 }
@@ -49,15 +51,16 @@ referer For web request, the Referrer, note, mispelled as in the RFC
 sld Second-Level Domain, ie what you'd buy on a registrar
 filetype File type or Extension
 mimetype MIME Type of the file
-time_ms Time in millis action took
-response_ms For web requests, total time to send response
-upstream_ms For web requests, total time to get response from upstream service
+{ "name": "time_ms", "type": "double", "description": "Time in millis action took" }
+{ "name": "response_ms", "type": "double", "description": "For web requests, total time to send response" }
+{ "name": "upstream_ms", "type": "double", "description": "For web requests, total time to get response from upstream service" }
 src_user Source username
 dst_user Destination username
-src_geoip GeoIP Data for the source IP
-dst_geoip GeoIP Data for the destination IP
-attacks Attacks root node
-attack_score Total score of all attack detection checks
-attack_triggers Total unique instances of tokens tripping attack checks
+{ "name": "src_geoip", "type": "geo_point", "description": "GeoIP Data for the source IP" }
+{ "name": "dst_geoip", "type": "geo_point", "description": "GeoIP Data for the destination IP" }
+{ "name": "attacks", "type": "object", "enabled": false, "description": "Attacks root node" }
+{ "name": "attack_score", "type": "integer", "description": "Total score of all attack detection checks" }
+attack_tokens Unique tokens identified in the attack scoring process
+attack_types Type of attacks detected
 name Name of the event
 class Class of the event
