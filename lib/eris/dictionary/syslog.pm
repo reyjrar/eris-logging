@@ -48,7 +48,7 @@ L<eris::dictionary>, L<eris::role::dictionary>
 1;
 __DATA__
 { "name": "timestamp", "type": "date", "description": "The timestamp encoded in the message" }
-message Message contents, often truncated to relevance.
+{ "name": "message", "type", "text", "description": "Message contents, often truncated to relevance" }
 severity Syslog severity of the message
 facility Syslog facility of the message
 program The program name or tag that generated the message
