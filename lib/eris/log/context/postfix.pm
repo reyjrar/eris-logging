@@ -89,12 +89,6 @@ sub contextualize_message {
     $log->add_tags(qw(mail));
     my %ctxt = ();
 
-    my @path = split /\//, $log->context->{program};
-    shift @path;
-    if( @path ) {
-        $ctxt{proc} = join('_', @path);
-    }
-
     if( my @connection = ($str =~ /^((?:dis)?connect) from ([^\[]+)\[([^\]]+)\]/) ) {
         @ctxt{qw(action src src_ip)} = @connection;
     }
@@ -115,9 +109,6 @@ sub contextualize_message {
                 $ctxt{status} = $1;
             }
         }
-    }
-    if( index($c->{program}, '/') > 0 ) {
-        @ctxt{qw(program proc)} = split m{/}, $c->{program}, 2;
     }
     # install the /v pairs
     if ( $c->{sdata} ) {
