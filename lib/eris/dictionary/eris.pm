@@ -56,8 +56,8 @@ mimetype MIME Type of the file
 { "name": "upstream_ms", "type": "double", "description": "For web requests, total time to get response from upstream service" }
 src_user Source username
 dst_user Destination username
-{ "name": "src_geoip", "type": "geo_point", "description": "GeoIP Data for the source IP" }
-{ "name": "dst_geoip", "type": "geo_point", "description": "GeoIP Data for the destination IP" }
+{ "name": "src_geoip", "type": "object", "description": "GeoIP Data for the source IP", "properties": { "location": { "type": "geo_point" } } }
+{ "name": "dst_geoip", "type": "object", "description": "GeoIP Data for the destination IP", "properties": { "location": { "type": "geo_point" } } }
 { "name": "attacks", "type": "object", "enabled": false, "description": "Attacks root node" }
 { "name": "attack_score", "type": "integer", "description": "Total score of all attack detection checks" }
 attack_tokens Unique tokens identified in the attack scoring process
