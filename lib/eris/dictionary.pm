@@ -42,9 +42,9 @@ HashRef of fields with true/false values indicated whether they exist in the dic
 =cut
 
 has fields => (
-    is => 'ro',
-    isa => HashRef,
-    lazy => 1,
+    is      => 'ro',
+    isa     => HashRef,
+    lazy    => 1,
     builder => '_build_fields',
 );
 

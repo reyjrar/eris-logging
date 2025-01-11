@@ -49,8 +49,8 @@ A HashRef of keys/values to add to every message. To configure:
 =cut
 
 has 'fields' => (
-    is  => 'rw',
-    isa => HashRef,
+    is      => 'rw',
+    isa     => HashRef,
     default => sub { 'disable loading' },
 );
 
