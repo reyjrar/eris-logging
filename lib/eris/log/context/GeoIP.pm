@@ -144,7 +144,7 @@ sub contextualize_message {
         my %geo = ();
         eval {
             my $city = $self->geo_lookup->city( ip => $ctxt->{$f} );
-            $geo{city}  = $city->city->name;
+            $geo{city}  = $city->city->name if $city->city->name;
             $geo{country}  = $city->country->iso_code;
             $geo{continent}  = $city->continent->code;
             my $loc = $city->location();

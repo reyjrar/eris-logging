@@ -13,7 +13,7 @@ use namespace::autoclean;
 =head1 SYNOPSIS
 
     use eris::dictionary;
-    use YAML;
+    use DDP;
 
     my $dict = eris::dictionary->new();
 
@@ -21,7 +21,7 @@ use namespace::autoclean;
         chomp;
         foreach my $word (split /\s+/) {
             my $def = $dict->lookup($word);
-            print Dump $def if $def;
+            p($def);
         }
     }
 

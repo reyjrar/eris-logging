@@ -240,7 +240,6 @@ sub as_bulk {
         {
             index => {
                 _index => strftime($self->index_name, gmtime $log->epoch ),
-                _type  => exists $self->types->{$log->type} ? $log->type : $self->default_type,
                 $log->uuid ? ( _id => $log->uuid ) : (),
             }
         },

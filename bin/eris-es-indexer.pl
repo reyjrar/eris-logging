@@ -14,7 +14,7 @@ use POE qw(
     Filter::Line
     Filter::Reference
 );
-use YAML qw();
+use YAML::XS qw();
 
 # Load the eris libraries
 use eris::log::contextualizer;
@@ -38,7 +38,7 @@ if( $opt->help ) {
 my $config = {};
 if( $opt->config ) {
     eval {
-        $config = YAML::LoadFile( $opt->config );
+        $config = YAML::XS::LoadFile( $opt->config );
         1;
     } or do {
         my $err = $@;
