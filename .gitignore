@@ -2,5 +2,6 @@
 Changes
 eris-*
 *.yml
+*.yaml
 *.json
 *.log
