@@ -55,7 +55,7 @@ sub contextualize_message {
 
     my %ctxt = ();
 
-    my ($user,$variables) = split ' : ', $str, 2;
+    my $user = (split ' : ', $str, 2)[0];
     foreach my $k (sort keys %MAP) {
         if( exists $sdata->{$k} ) {
             $ctxt{$MAP{$k}} = $sdata->{$k};
