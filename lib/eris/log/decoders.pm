@@ -1,6 +1,7 @@
 package eris::log::decoders;
 # ABSTRACT: Discovery and access for decoders
 
+use v5.32;
 use eris::log;
 use Time::HiRes qw(gettimeofday tv_interval);
 use Types::Standard qw(ArrayRef);
@@ -89,6 +90,9 @@ decoder in real world situations.
                 $log->unix_timestamp( delete $data->{epoch} ) if $data->{epoch};
                 # Stash the rest of the message
                 $log->add_context($decoder_name => $data);
+                if ( my $tags = $data->{tags}) {
+                    eval { $log->add_tags(@{ $tags }) };
+                }
             }
             $t{$decoder_name} = tv_interval($t0);
         }

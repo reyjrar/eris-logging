@@ -1,6 +1,7 @@
 package eris::schema::syslog;
 # ABSTRACT: Schema for the syslog data
 
+use v5.32;
 use Moo;
 use Types::Standard qw(InstanceOf);
 

@@ -1,12 +1,14 @@
 package eris::log::contextualizer;
 # ABSTRACT: Primary interface to the eris log parsing library
 
+use v5.32;
 use Moo;
 use Time::HiRes qw(gettimeofday tv_interval);
 use Types::Standard qw( HashRef InstanceOf );
 
 use eris::log::contexts;
 use eris::log::decoders;
+use eris::dictionary;
 
 use namespace::autoclean;
 
@@ -57,9 +59,9 @@ the config or an empty HashRef
 has contexts => (
     is      => 'ro',
     isa     => InstanceOf['eris::log::contexts'],
-    handles => [qw(contextualize)],
     lazy    => 1,
     builder => '_build_contexts',
+    handles => [qw(contextualize)],
 );
 sub _build_contexts {
     my $self = shift;
@@ -79,7 +81,6 @@ the config or an empty HashRef
 has 'decoders' => (
     is      => 'ro',
     isa     => InstanceOf['eris::log::decoders'],
-    handles => [qw(decode)],
     lazy    => 1,
     builder => '_build_decoders',
     handles => [qw(decode)],
@@ -90,6 +91,20 @@ sub _build_decoders {
         %{ $self->config->{decoders} || {} },
     );
 }
+
+=attr dictionary
+
+An instance of L<eris::dictionary> to prepopulate fields directly from the log.
+
+=cut
+has 'dictionary' => (
+    is => 'ro',
+    isa => InstanceOf['eris::dictionary'],
+    lazy => 1,
+    builder => '_build_dictionary',
+    handles => [qw(fields)],
+);
+sub _build_dictionary { eris::dictionary->new() }
 
 =method parse
 
@@ -109,12 +124,20 @@ parser performance.
 
 sub parse {
     my ($self,$raw) = @_;
+    state $fields = $self->fields();
 
     # Apply the decoders
     my %t=();
     my $t0 = [gettimeofday];
     my $log = $self->decode($raw);
     $log->add_context( raw => { raw => $raw } );
+    my $decoded = $log->decoded;
+    my %collected = map { $_ => $decoded->{$_} }
+                    grep { exists $fields->{$_} }
+                    keys %{ $decoded };
+
+    $log->add_context( dictionary => \%collected )
+        if %collected;
     my $tdiff = tv_interval($t0);
     $t{decoders} = $tdiff;
 

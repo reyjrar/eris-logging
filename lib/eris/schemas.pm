@@ -1,6 +1,7 @@
 package eris::schemas;
 # ABSTRACT: Discovery and access for schemas
 
+use v5.32;
 use Moo;
 with qw(
     eris::role::pluggable

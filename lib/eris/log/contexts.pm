@@ -1,6 +1,7 @@
 package eris::log::contexts;
 # ABSTRACT: Discovery and access for context objects
 
+use v5.32;
 use List::Util qw(any);
 use Ref::Util qw(is_ref is_arrayref is_coderef is_regexpref);
 use Time::HiRes qw(gettimeofday tv_interval);

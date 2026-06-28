@@ -1,6 +1,7 @@
 package eris::dictionary;
 # ABSTRACT: Field dictionary loader
 
+use v5.32;
 use Moo;
 with qw(
     eris::role::pluggable

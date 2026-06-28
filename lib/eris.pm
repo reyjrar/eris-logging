@@ -1,7 +1,7 @@
 package eris;
 # ABSTRACT: Eris is the Greek Goddess of Chaos
 
-use strict;
+use v5.32;
 use warnings;
 
 # VERSION

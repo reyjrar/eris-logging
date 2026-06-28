@@ -64,3 +64,5 @@ attack_tokens Unique tokens identified in the attack scoring process
 attack_types Type of attacks detected
 name Name of the event
 class Class of the event
+rule_name Security rule name
+rule_id Security rule id

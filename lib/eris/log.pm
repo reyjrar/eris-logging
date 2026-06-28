@@ -1,6 +1,7 @@
 package eris::log;
 # ABSTRACT: Structured log or event object implementation
 
+use v5.32;
 use Hash::Flatten ();
 use Hash::Merge::Simple qw(clone_merge);
 use Moo;
